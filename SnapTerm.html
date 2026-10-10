@@ -168,7 +168,7 @@
   <div class="wrap">
     <h1>SnapTerm → JPG</h1>
     <p class="sub">
-      Panel height now auto-fits the content exactly.
+      Fixed 95% JPG quality. Adjust the bottom space to match your panel.
     </p>
 
     <div class="layout">
@@ -198,10 +198,10 @@
         </div>
 
         <div class="field">
-          <label class="lbl" for="quality">
-            JPG quality <span class="val" id="qVal">95%</span>
+          <label class="lbl" for="bottomSpace">
+            Extra bottom space <span class="val" id="bsVal">120px</span>
           </label>
-          <input type="range" id="quality" min="60" max="100" step="1" value="95" />
+          <input type="range" id="bottomSpace" min="0" max="800" step="10" value="120" />
         </div>
 
         <div class="check">
@@ -219,7 +219,7 @@
       <div class="preview-card">
         <canvas id="termCanvas"></canvas>
         <p class="hint">
-          No trailing empty space — the panel stops right after the last line.
+          Raise <b>Extra bottom space</b> until the preview matches your real VS Code panel.
         </p>
       </div>
     </div>
@@ -243,6 +243,9 @@
         "[8] Exit",
         "Enter your choice: "
       ].join("\n");
+
+      // Fixed JPG export quality — no slider
+      var JPG_QUALITY = 0.95;
 
       // Panel geometry
       var HEADER_H = 35;
@@ -273,11 +276,11 @@
         output: $("output"),
         fontSize: $("fontSize"),
         panelWidth: $("panelWidth"),
-        quality: $("quality"),
+        bottomSpace: $("bottomSpace"),
         cursor: $("cursor"),
         fsVal: $("fsVal"),
         pwVal: $("pwVal"),
-        qVal: $("qVal"),
+        bsVal: $("bsVal"),
         dl: $("dl"),
         copy: $("copy"),
         reset: $("reset")
@@ -391,13 +394,14 @@
         try {
           var fontSize = +els.fontSize.value;
           var panelW = +els.panelWidth.value;
+          var bottomSpace = +els.bottomSpace.value;
           var showCursor = els.cursor.checked;
           var prompt = els.prompt.value;
           var output = els.output.value;
 
           els.fsVal.textContent = fontSize + "px";
           els.pwVal.textContent = panelW + "px";
-          els.qVal.textContent = els.quality.value + "%";
+          els.bsVal.textContent = bottomSpace + "px";
 
           var lineH = Math.round(fontSize * 1.33);
           var bodyFont = fontSize + "px " + MONO;
@@ -418,9 +422,7 @@
           }
 
           var bodyLines = Math.max(lines.length, showCursor ? cursorLine + 1 : 0);
-
-          // Height fits content exactly — no bottom space
-          var H = HEADER_H + PAD_T + bodyLines * lineH + PAD_B;
+          var H = HEADER_H + PAD_T + bodyLines * lineH + PAD_B + bottomSpace;
           if (H < 160) H = 160;
 
           var S = 2;
@@ -479,8 +481,7 @@
 
       function download() {
         try {
-          var q = Math.max(0.01, Math.min(1, (+els.quality.value) / 100));
-
+          // Composite over panel bg first — JPEG has no alpha channel
           var tmp = document.createElement("canvas");
           tmp.width = canvas.width;
           tmp.height = canvas.height;
@@ -489,7 +490,7 @@
           tctx.fillRect(0, 0, tmp.width, tmp.height);
           tctx.drawImage(canvas, 0, 0);
 
-          var dataUrl = tmp.toDataURL("image/jpeg", q);
+          var dataUrl = tmp.toDataURL("image/jpeg", JPG_QUALITY);
           var a = document.createElement("a");
           a.href = dataUrl;
           a.download = "snapterm.jpg";
@@ -527,7 +528,7 @@
         els.output.value = DEFAULT_OUTPUT;
         els.fontSize.value = 14;
         els.panelWidth.value = 1500;
-        els.quality.value = 95;
+        els.bottomSpace.value = 120;
         els.cursor.checked = true;
         render();
       }
@@ -535,7 +536,7 @@
       function bind() {
         var inputs = [
           els.prompt, els.output, els.fontSize,
-          els.panelWidth, els.quality, els.cursor
+          els.panelWidth, els.bottomSpace, els.cursor
         ];
         for (var i = 0; i < inputs.length; i++) {
           inputs[i].addEventListener("input", render);
