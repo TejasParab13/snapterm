@@ -3,227 +3,616 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SnapTerm — VS Code Terminal → JPG</title>
+  <title>SnapTerm — Fake VS Code terminal screenshots</title>
+  <meta name="description" content="Generate pixel-accurate VS Code terminal screenshots from pasted text. Runs entirely in your browser." />
   <style>
     :root {
-      --bg: #0b0b0c;
+      --bg: #0a0a0b;
       --card: #141416;
-      --border: #2a2a2e;
+      --card-2: #1a1a1d;
+      --border: #26262a;
+      --border-2: #333338;
       --text: #e6e6e6;
+      --text-2: #b8b8bd;
       --muted: #8b8b93;
-      --blue: #0e639c;
-      --blue-hover: #1177bb;
-      --blue-bright: #3794ff;
+      --accent: #3794ff;
+      --success: #2f7a44;
+      --shadow: 0 12px 34px rgba(0, 0, 0, .55);
     }
 
     * { box-sizing: border-box; }
 
-    body {
+    html, body {
       margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
       background: var(--bg);
       color: var(--text);
       font-family: "Segoe UI", system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
       font-size: 14px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 400px;
+      background: radial-gradient(ellipse at 50% 0%, rgba(55, 148, 255, .08), transparent 65%);
+      pointer-events: none;
+      z-index: 0;
     }
 
     .wrap {
+      position: relative;
       max-width: 1680px;
       margin: 0 auto;
-      padding: 24px 20px 60px;
+      padding: 20px 24px;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      z-index: 1;
     }
 
-    h1 { font-size: 18px; font-weight: 600; margin: 0 0 4px; }
-    .sub { color: var(--muted); font-size: 13px; margin: 0 0 20px; }
+    /* ----- Header ------------------------------------------------ */
+    .app-header {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--border);
+    }
 
-    .layout {
+    .brand-mark {
+      width: 44px;
+      height: 44px;
       display: grid;
-      grid-template-columns: 340px minmax(0, 1fr);
-      gap: 20px;
-      align-items: start;
-    }
-    @media (max-width: 980px) {
-      .layout { grid-template-columns: 1fr; }
+      place-items: center;
+      border-radius: 11px;
+      background: linear-gradient(135deg, #0e639c 0%, #3794ff 100%);
+      color: #fff;
+      font-family: Consolas, "Cascadia Mono", monospace;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -1px;
+      box-shadow: 0 8px 22px rgba(55, 148, 255, .3);
+      flex-shrink: 0;
     }
 
+    .brand h1 {
+      margin: 0;
+      font-size: 19px;
+      font-weight: 600;
+      letter-spacing: -.01em;
+    }
+
+    .brand p {
+      margin: 2px 0 0;
+      font-size: 12.5px;
+      color: var(--muted);
+    }
+
+    /* ----- Layout ------------------------------------------------ */
+    .layout {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 320px minmax(0, 1fr);
+      gap: 20px;
+    }
+
+    /* ----- Cards ------------------------------------------------- */
     .card {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 16px;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, .2);
+      min-height: 0;
+      /* Sidebar fits without scroll on typical screens */
     }
 
     .preview-card {
-      background: var(--card);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      background:
+        radial-gradient(ellipse at 50% 0%, rgba(55, 148, 255, .07), transparent 55%),
+        var(--card);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 16px;
-      overflow: auto;
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, .2);
+      overflow: hidden;
+      min-height: 0;
     }
 
-    label.lbl {
-      display: block;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: .05em;
-      color: var(--muted);
-      margin: 0 0 6px;
-      font-weight: 700;
-    }
+    /* ----- Section titles ---------------------------------------- */
+    .section { margin-bottom: 18px; }
+    .section:last-child { margin-bottom: 0; }
 
-    input[type=text], textarea {
-      width: 100%;
-      background: #0e0e10;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: #e6e6e6;
-      padding: 8px 10px;
-      font-family: "Cascadia Mono", "Cascadia Code", Consolas, "Courier New", monospace;
-      font-size: 13px;
-      resize: vertical;
-      outline: none;
-    }
-    input[type=text]:focus,
-    textarea:focus { border-color: var(--blue-bright); }
-
-    .field { margin-bottom: 14px; }
-    textarea { min-height: 170px; line-height: 1.5; }
-
-    input[type=range] {
-      width: 100%;
-      accent-color: var(--blue-bright);
-      cursor: pointer;
-    }
-
-    .val {
-      float: right;
-      font-family: Consolas, monospace;
-      font-size: 11px;
-      color: var(--blue-bright);
-    }
-
-    .check {
+    .section-title {
       display: flex;
       align-items: center;
       gap: 8px;
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--muted);
+      margin: 0 0 12px;
+    }
+
+    .section-title::before {
+      content: "";
+      width: 3px;
+      height: 11px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    /* ----- Fields ------------------------------------------------ */
+    .field { margin-bottom: 14px; }
+    .field:last-child { margin-bottom: 0; }
+
+    label.lbl {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-2);
+      margin: 0 0 6px;
+    }
+
+    .val {
+      font-family: Consolas, monospace;
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--accent);
+      background: rgba(55, 148, 255, .1);
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+
+    input[type=text],
+    textarea {
+      width: 100%;
+      background: #0b0b0d;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      padding: 10px 12px;
+      font-family: "Cascadia Mono", "Cascadia Code", Consolas, "Courier New", monospace;
+      font-size: 12.5px;
+      line-height: 1.5;
+      outline: none;
+      transition: border-color .15s, background .15s, box-shadow .15s;
+    }
+
+    input[type=text]:focus,
+    textarea:focus {
+      border-color: var(--accent);
+      background: #0d0d10;
+      box-shadow: 0 0 0 3px rgba(55, 148, 255, .15);
+    }
+
+    /* ----- Sliders ----------------------------------------------- */
+    input[type=range] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      background: var(--border-2);
+      border-radius: 4px;
+      outline: none;
+      cursor: pointer;
+      margin: 4px 0;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid var(--card);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, .4);
+      transition: transform .12s, background .12s;
+    }
+
+    input[type=range]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+      background: #4da3ff;
+    }
+
+    input[type=range]::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid var(--card);
+      cursor: pointer;
+    }
+
+    /* ----- Presets ----------------------------------------------- */
+    .presets {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .preset {
+      font: inherit;
+      font-size: 11.5px;
+      font-weight: 500;
+      padding: 5px 10px;
+      background: transparent;
+      border: 1px solid var(--border-2);
+      border-radius: 6px;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .12s;
+    }
+
+    .preset:hover { color: #fff; border-color: var(--accent); }
+    .preset.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    /* ----- Checkbox ---------------------------------------------- */
+    .check {
+      display: flex;
+      align-items: center;
+      gap: 10px;
       font-size: 13px;
-      color: #c8c8c8;
-      margin: 0 0 16px;
+      color: var(--text-2);
+      margin: 0 0 14px;
+      cursor: pointer;
+      user-select: none;
     }
 
     input[type=checkbox] {
-      accent-color: var(--blue-bright);
-      width: 15px;
-      height: 15px;
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border: 1.5px solid var(--border-2);
+      border-radius: 4px;
+      background: #0b0b0d;
       cursor: pointer;
+      position: relative;
+      transition: all .12s;
+      flex-shrink: 0;
     }
 
-    .btns { display: flex; gap: 10px; flex-wrap: wrap; }
+    input[type=checkbox]:checked {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    input[type=checkbox]:checked::after {
+      content: "";
+      position: absolute;
+      left: 4px;
+      top: 1px;
+      width: 4px;
+      height: 8px;
+      border: solid #fff;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+
+    input[type=checkbox]:focus-visible {
+      box-shadow: 0 0 0 3px rgba(55, 148, 255, .25);
+    }
+
+    /* ----- Buttons ----------------------------------------------- */
+    .btns {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
 
     button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
       font: inherit;
       font-size: 13px;
       font-weight: 600;
-      border-radius: 6px;
+      border-radius: 8px;
       border: 1px solid transparent;
-      padding: 9px 14px;
+      padding: 10px 16px;
       cursor: pointer;
-      background: #2a2a2e;
-      color: #e6e6e6;
-      transition: background .12s;
+      transition: all .12s;
+      white-space: nowrap;
     }
-    button.primary { background: var(--blue); color: #fff; }
-    button.primary:hover { background: var(--blue-hover); }
+
+    button:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(55, 148, 255, .35);
+    }
+
+    button.primary {
+      background: var(--accent);
+      color: #fff;
+      flex: 1 0 100%;
+      box-shadow: 0 4px 14px rgba(55, 148, 255, .25);
+    }
+
+    button.primary:hover {
+      background: #4da3ff;
+      box-shadow: 0 6px 20px rgba(55, 148, 255, .35);
+    }
+
+    button.primary:active { transform: translateY(1px); }
 
     button.ghost {
       background: transparent;
-      border-color: var(--border);
-      color: #c8c8c8;
+      border-color: var(--border-2);
+      color: var(--text-2);
+      flex: 1;
     }
-    button.ghost:hover { background: #1f1f22; }
-    button:active { transform: translateY(1px); }
+
+    button.ghost:hover {
+      background: var(--card-2);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    button.ghost:active { transform: translateY(1px); }
+
+    /* ----- Canvas area (scrolls if too tall) ---------------------- */
+    .canvas-scroll {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      padding: 4px;
+      margin: -4px;
+    }
 
     #termCanvas {
       display: block;
       max-width: 100%;
       height: auto;
-      border-radius: 6px;
-      box-shadow: 0 12px 34px rgba(0, 0, 0, .6);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
     }
 
+    /* ----- Canvas info bar --------------------------------------- */
+    .canvas-info {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .canvas-info .dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--border-2);
+    }
+
+    .canvas-info b {
+      color: var(--text-2);
+      font-weight: 600;
+      font-family: Consolas, monospace;
+      font-size: 11.5px;
+    }
+
+    /* ----- Output editor inside preview (pinned) ------------------ */
+    .output-section {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .output-section textarea {
+      min-height: 110px;
+      max-height: 200px;
+      resize: vertical;
+    }
+
+    /* ----- Toast ------------------------------------------------- */
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 30px;
+      transform: translateX(-50%) translateY(16px);
+      background: #1f1f22;
+      border: 1px solid var(--border-2);
+      color: #fff;
+      padding: 11px 18px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .22s ease, transform .22s ease;
+      box-shadow: 0 14px 40px rgba(0, 0, 0, .6);
+      z-index: 100;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .toast.success { border-color: var(--success); }
+    .toast.error { border-color: #a33333; }
+
+    /* ----- Hint -------------------------------------------------- */
     .hint {
       color: var(--muted);
       font-size: 12px;
-      margin: 14px 0 0;
-      line-height: 1.55;
+      margin: 12px 0 0;
+      line-height: 1.5;
     }
-    .hint code {
-      background: #1e1e22;
+
+    kbd {
+      display: inline-block;
       padding: 1px 5px;
+      font-size: 10.5px;
+      font-family: Consolas, monospace;
+      background: var(--card-2);
+      border: 1px solid var(--border-2);
       border-radius: 4px;
-      font-size: 11px;
+      color: var(--text-2);
+    }
+
+    /* ----- Scrollbar --------------------------------------------- */
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-2);
+      border-radius: 6px;
+      border: 2px solid var(--card);
+    }
+    ::-webkit-scrollbar-thumb:hover { background: #4a4a52; }
+
+    /* ----- Small screens: allow normal page flow ------------------ */
+    @media (max-width: 1080px) {
+      html, body { overflow: auto; height: auto; }
+      .wrap { height: auto; padding: 20px; }
+      .layout { grid-template-columns: 1fr; }
+      .preview-card { min-height: 500px; }
     }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>SnapTerm → JPG</h1>
-    <p class="sub">
-      Final polish — circle aligned with the cap-height of "PS", proper gutter spacing.
-    </p>
+
+    <header class="app-header">
+      <div class="brand-mark">&gt;_</div>
+      <div>
+        <h1>SnapTerm</h1>
+        <p>Pixel-accurate VS Code terminal screenshots — right in your browser</p>
+      </div>
+    </header>
 
     <div class="layout">
-      <div class="card">
-        <div class="field">
-          <label class="lbl" for="prompt">Prompt / command line</label>
-          <input type="text" id="prompt" spellcheck="false" />
+
+      <!-- ============ SIDEBAR ============ -->
+      <aside class="card">
+
+        <div class="section">
+          <div class="section-title">Content</div>
+          <div class="field">
+            <label class="lbl" for="prompt">Prompt / command line</label>
+            <input type="text" id="prompt" spellcheck="false" />
+          </div>
         </div>
 
-        <div class="field">
-          <label class="lbl" for="output">Terminal output</label>
+        <div class="section">
+          <div class="section-title">Layout</div>
+
+          <div class="field">
+            <label class="lbl" for="fontSize">
+              Font size <span class="val" id="fsVal">14px</span>
+            </label>
+            <input type="range" id="fontSize" min="10" max="22" step="1" value="14" />
+          </div>
+
+          <div class="field">
+            <label class="lbl" for="panelWidth">
+              Panel width <span class="val" id="pwVal">1500px</span>
+            </label>
+            <input type="range" id="panelWidth" min="700" max="2600" step="10" value="1500" />
+            <div class="presets" id="presets">
+              <button class="preset" data-w="1000" type="button">1080p</button>
+              <button class="preset" data-w="1500" type="button">1500</button>
+              <button class="preset" data-w="1920" type="button">1920</button>
+              <button class="preset" data-w="2400" type="button">Wide</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="lbl" for="bottomSpace">
+              Extra bottom space <span class="val" id="bsVal">120px</span>
+            </label>
+            <input type="range" id="bottomSpace" min="0" max="800" step="10" value="120" />
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Actions</div>
+
+          <div class="check">
+            <input type="checkbox" id="cursor" checked />
+            <label for="cursor" style="margin: 0; cursor: pointer">Show cursor block</label>
+          </div>
+
+          <div class="btns">
+            <button class="primary" id="dl" type="button">
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                <path d="M8 12.5 3.5 8l1.06-1.06L7.25 9.63V1.5h1.5v8.13l2.69-2.69L12.5 8 8 12.5Zm-5 1.5h10v1H3v-1Z"/>
+              </svg>
+              Download JPG
+            </button>
+            <button class="ghost" id="copy" type="button" title="Copy to clipboard">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                <path d="M10 1H3a1 1 0 0 0-1 1v8h1.5V2.5H10V1Zm2 2.5H6a1 1 0 0 0-1 1V14a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.5a1 1 0 0 0-1-1Zm0 10.5H6V4.5h6V14Z"/>
+              </svg>
+              Copy
+            </button>
+            <button class="ghost" id="reset" type="button" title="Reset">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                <path d="M8 3a5 5 0 1 0 4.546 2.914.75.75 0 0 1 1.302-.746A6.5 6.5 0 1 1 8 1.5V.75a.25.25 0 0 1 .41-.19l2.5 2.5a.25.25 0 0 1 0 .38l-2.5 2.5A.25.25 0 0 1 8 5.75V3Z"/>
+              </svg>
+              Reset
+            </button>
+          </div>
+
+          <p class="hint">
+            Tip: press <kbd>Ctrl</kbd>+<kbd>Enter</kbd> to download instantly.
+          </p>
+        </div>
+
+      </aside>
+
+      <!-- ============ PREVIEW ============ -->
+      <main class="preview-card">
+
+        <!-- Canvas scrolls if too tall -->
+        <div class="canvas-scroll">
+          <canvas id="termCanvas"></canvas>
+        </div>
+
+        <!-- Info bar -->
+        <div class="canvas-info">
+          <span>Size: <b id="dimInfo">—</b></span>
+          <span class="dot"></span>
+          <span>Lines: <b id="lineInfo">—</b></span>
+          <span class="dot"></span>
+          <span>Export: <b>JPEG · 95%</b></span>
+        </div>
+
+        <!-- Editable output — pinned at bottom, no scrolling outside -->
+        <div class="output-section">
+          <label class="lbl" for="output">Terminal output — paste or type here</label>
           <textarea id="output" spellcheck="false"></textarea>
         </div>
 
-        <div class="field">
-          <label class="lbl" for="fontSize">
-            Font size <span class="val" id="fsVal">14px</span>
-          </label>
-          <input type="range" id="fontSize" min="10" max="22" step="1" value="14" />
-        </div>
+      </main>
 
-        <div class="field">
-          <label class="lbl" for="panelWidth">
-            Panel width <span class="val" id="pwVal">1500px</span>
-          </label>
-          <input type="range" id="panelWidth" min="700" max="2600" step="10" value="1500" />
-        </div>
-
-        <div class="field">
-          <label class="lbl" for="bottomSpace">
-            Extra bottom space <span class="val" id="bsVal">120px</span>
-          </label>
-          <input type="range" id="bottomSpace" min="0" max="800" step="10" value="120" />
-        </div>
-
-        <div class="check">
-          <input type="checkbox" id="cursor" checked />
-          <label for="cursor" style="margin: 0; cursor: pointer">Show cursor block</label>
-        </div>
-
-        <div class="btns">
-          <button class="primary" id="dl" type="button">Download JPG</button>
-          <button class="ghost" id="copy" type="button">Copy image</button>
-          <button class="ghost" id="reset" type="button">Reset</button>
-        </div>
-      </div>
-
-      <div class="preview-card">
-        <canvas id="termCanvas"></canvas>
-        <p class="hint">
-          Final version — the hollow ring sits level with the top of "PS".
-        </p>
-      </div>
     </div>
   </div>
+
+  <div class="toast" id="toast"></div>
 
   <script>
     (function () {
@@ -244,22 +633,17 @@
         "Enter your choice: "
       ].join("\n");
 
-      // Fixed JPG export quality — no slider
       var JPG_QUALITY = 0.95;
-
-      // Panel geometry
       var HEADER_H = 35;
-      var GUTTER = 22;   // widened for proper circle alignment
+      var GUTTER = 22;
       var PAD_L = 6;
       var PAD_R = 12;
       var PAD_T = 4;
       var PAD_B = 8;
 
-      // Fonts
       var MONO = '"Cascadia Mono", "Cascadia Code", Consolas, "Courier New", monospace';
       var UI_FONT = '13px "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif';
 
-      // VS Code Dark+ colours
       var C_PANEL = "#181818";
       var C_BORDER = "#2b2b2b";
       var C_TAB = "#9d9d9d";
@@ -283,12 +667,26 @@
         bsVal: $("bsVal"),
         dl: $("dl"),
         copy: $("copy"),
-        reset: $("reset")
+        reset: $("reset"),
+        dimInfo: $("dimInfo"),
+        lineInfo: $("lineInfo"),
+        presets: $("presets"),
+        toast: $("toast")
       };
 
       var canvas = $("termCanvas");
       var ctx = canvas.getContext("2d");
       var meas = document.createElement("canvas").getContext("2d");
+
+      var toastTimer = null;
+      function showToast(msg, kind) {
+        els.toast.textContent = msg;
+        els.toast.className = "toast show" + (kind ? " " + kind : "");
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () {
+          els.toast.className = "toast" + (kind ? " " + kind : "");
+        }, 1800);
+      }
 
       function wrapChars(text, maxChars) {
         var out = [];
@@ -447,7 +845,6 @@
 
           var startY = HEADER_H + PAD_T;
 
-          // Hollow ring, nudged up 1px to align with the cap-height of "PS"
           if (prompt.length > 0 && lines.length > 0) {
             var dotCx = PAD_L + GUTTER / 2 - 2;
             var dotCy = startY + lineH / 2 - 1;
@@ -474,6 +871,16 @@
             ctx.fillStyle = C_TEXT;
             ctx.fillRect(textLeft + cursorCol * charW, cy + (lineH - ch) / 2, charW, ch);
           }
+
+          els.dimInfo.textContent = panelW + " × " + H + " px";
+          els.lineInfo.textContent = lines.length;
+
+          var presetBtns = els.presets.querySelectorAll(".preset");
+          for (var k = 0; k < presetBtns.length; k++) {
+            var pw = +presetBtns[k].dataset.w;
+            if (pw === panelW) presetBtns[k].classList.add("active");
+            else presetBtns[k].classList.remove("active");
+          }
         } catch (err) {
           console.error("Render error:", err);
         }
@@ -481,7 +888,6 @@
 
       function download() {
         try {
-          // Composite over panel bg first — JPEG has no alpha channel
           var tmp = document.createElement("canvas");
           tmp.width = canvas.width;
           tmp.height = canvas.height;
@@ -497,29 +903,22 @@
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);
+          showToast("Saved as snapterm.jpg", "success");
         } catch (err) {
           console.error("Download error:", err);
-          alert("Download failed: " + err.message);
+          showToast("Download failed — try again", "error");
         }
       }
 
       function copyImage() {
-        var original = els.copy.textContent;
         if (!navigator.clipboard || !window.ClipboardItem) {
-          els.copy.textContent = "Not supported";
-          setTimeout(function () { els.copy.textContent = original; }, 1500);
+          showToast("Clipboard not supported", "error");
           return;
         }
         canvas.toBlob(function (blob) {
           navigator.clipboard.write([new ClipboardItem({ "image/png": blob })])
-            .then(function () {
-              els.copy.textContent = "Copied";
-              setTimeout(function () { els.copy.textContent = original; }, 1500);
-            })
-            .catch(function () {
-              els.copy.textContent = "Use Download";
-              setTimeout(function () { els.copy.textContent = original; }, 1500);
-            });
+            .then(function () { showToast("Copied to clipboard", "success"); })
+            .catch(function () { showToast("Copy failed — use Download", "error"); });
         }, "image/png");
       }
 
@@ -531,6 +930,7 @@
         els.bottomSpace.value = 120;
         els.cursor.checked = true;
         render();
+        showToast("Settings reset");
       }
 
       function bind() {
@@ -542,9 +942,24 @@
           inputs[i].addEventListener("input", render);
           inputs[i].addEventListener("change", render);
         }
+
         els.dl.addEventListener("click", download);
         els.copy.addEventListener("click", copyImage);
         els.reset.addEventListener("click", reset);
+
+        els.presets.addEventListener("click", function (ev) {
+          var target = ev.target.closest(".preset");
+          if (!target) return;
+          els.panelWidth.value = target.dataset.w;
+          render();
+        });
+
+        document.addEventListener("keydown", function (ev) {
+          if ((ev.ctrlKey || ev.metaKey) && ev.key === "Enter") {
+            ev.preventDefault();
+            download();
+          }
+        });
       }
 
       function init() {
@@ -552,6 +967,7 @@
         els.output.value = DEFAULT_OUTPUT;
         bind();
         render();
+        console.log("SnapTerm ready.");
       }
 
       if (document.readyState === "loading") {
