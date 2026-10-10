@@ -168,7 +168,7 @@
   <div class="wrap">
     <h1>SnapTerm → JPG</h1>
     <p class="sub">
-      Fixed 95% JPG quality. Adjust the bottom space to match your panel.
+      Final polish — circle aligned with the cap-height of "PS", proper gutter spacing.
     </p>
 
     <div class="layout">
@@ -219,7 +219,7 @@
       <div class="preview-card">
         <canvas id="termCanvas"></canvas>
         <p class="hint">
-          Raise <b>Extra bottom space</b> until the preview matches your real VS Code panel.
+          Final version — the hollow ring sits level with the top of "PS".
         </p>
       </div>
     </div>
@@ -249,7 +249,7 @@
 
       // Panel geometry
       var HEADER_H = 35;
-      var GUTTER = 18;
+      var GUTTER = 22;   // widened for proper circle alignment
       var PAD_L = 6;
       var PAD_R = 12;
       var PAD_T = 4;
@@ -447,10 +447,10 @@
 
           var startY = HEADER_H + PAD_T;
 
-          // Hollow ring before the PS prompt
+          // Hollow ring, nudged up 1px to align with the cap-height of "PS"
           if (prompt.length > 0 && lines.length > 0) {
-            var dotCx = PAD_L + GUTTER / 2 + 1;
-            var dotCy = startY + lineH / 2;
+            var dotCx = PAD_L + GUTTER / 2 - 2;
+            var dotCy = startY + lineH / 2 - 1;
             ctx.beginPath();
             ctx.arc(dotCx, dotCy, 4.5, 0, Math.PI * 2);
             ctx.strokeStyle = C_DOT;
