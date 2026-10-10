@@ -168,7 +168,7 @@
   <div class="wrap">
     <h1>SnapTerm → JPG</h1>
     <p class="sub">
-      Hollow ring matches real VS Code's shell-integration indicator.
+      Panel height now auto-fits the content exactly.
     </p>
 
     <div class="layout">
@@ -198,13 +198,6 @@
         </div>
 
         <div class="field">
-          <label class="lbl" for="bottomSpace">
-            Extra bottom space <span class="val" id="bsVal">120px</span>
-          </label>
-          <input type="range" id="bottomSpace" min="0" max="800" step="10" value="120" />
-        </div>
-
-        <div class="field">
           <label class="lbl" for="quality">
             JPG quality <span class="val" id="qVal">95%</span>
           </label>
@@ -226,7 +219,7 @@
       <div class="preview-card">
         <canvas id="termCanvas"></canvas>
         <p class="hint">
-          Ring drawn with <code>ctx.stroke()</code> instead of <code>ctx.fill()</code>.
+          No trailing empty space — the panel stops right after the last line.
         </p>
       </div>
     </div>
@@ -280,12 +273,10 @@
         output: $("output"),
         fontSize: $("fontSize"),
         panelWidth: $("panelWidth"),
-        bottomSpace: $("bottomSpace"),
         quality: $("quality"),
         cursor: $("cursor"),
         fsVal: $("fsVal"),
         pwVal: $("pwVal"),
-        bsVal: $("bsVal"),
         qVal: $("qVal"),
         dl: $("dl"),
         copy: $("copy"),
@@ -356,7 +347,6 @@
         ctx.stroke();
       }
 
-      /** Problems | Debug Console | Terminal ... + ⌄ ⌃ ✕ */
       function drawHeader(W) {
         ctx.font = UI_FONT;
         ctx.textBaseline = "middle";
@@ -401,14 +391,12 @@
         try {
           var fontSize = +els.fontSize.value;
           var panelW = +els.panelWidth.value;
-          var bottomSpace = +els.bottomSpace.value;
           var showCursor = els.cursor.checked;
           var prompt = els.prompt.value;
           var output = els.output.value;
 
           els.fsVal.textContent = fontSize + "px";
           els.pwVal.textContent = panelW + "px";
-          els.bsVal.textContent = bottomSpace + "px";
           els.qVal.textContent = els.quality.value + "%";
 
           var lineH = Math.round(fontSize * 1.33);
@@ -430,7 +418,9 @@
           }
 
           var bodyLines = Math.max(lines.length, showCursor ? cursorLine + 1 : 0);
-          var H = HEADER_H + PAD_T + bodyLines * lineH + PAD_B + bottomSpace;
+
+          // Height fits content exactly — no bottom space
+          var H = HEADER_H + PAD_T + bodyLines * lineH + PAD_B;
           if (H < 160) H = 160;
 
           var S = 2;
@@ -455,7 +445,7 @@
 
           var startY = HEADER_H + PAD_T;
 
-          // Hollow ring (stroke instead of fill)
+          // Hollow ring before the PS prompt
           if (prompt.length > 0 && lines.length > 0) {
             var dotCx = PAD_L + GUTTER / 2 + 1;
             var dotCy = startY + lineH / 2;
@@ -491,7 +481,6 @@
         try {
           var q = Math.max(0.01, Math.min(1, (+els.quality.value) / 100));
 
-          // Composite over panel bg first — JPEG has no alpha channel
           var tmp = document.createElement("canvas");
           tmp.width = canvas.width;
           tmp.height = canvas.height;
@@ -538,7 +527,6 @@
         els.output.value = DEFAULT_OUTPUT;
         els.fontSize.value = 14;
         els.panelWidth.value = 1500;
-        els.bottomSpace.value = 120;
         els.quality.value = 95;
         els.cursor.checked = true;
         render();
@@ -546,8 +534,8 @@
 
       function bind() {
         var inputs = [
-          els.prompt, els.output, els.fontSize, els.panelWidth,
-          els.bottomSpace, els.quality, els.cursor
+          els.prompt, els.output, els.fontSize,
+          els.panelWidth, els.quality, els.cursor
         ];
         for (var i = 0; i < inputs.length; i++) {
           inputs[i].addEventListener("input", render);
