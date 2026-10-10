@@ -6,84 +6,169 @@
   <title>SnapTerm — VS Code Terminal → JPG</title>
   <style>
     :root {
-      --bg: #0b0b0c; --card: #141416; --border: #2a2a2e;
-      --text: #e6e6e6; --muted: #8b8b93;
-      --blue: #0e639c; --blue-hover: #1177bb; --blue-bright: #3794ff;
+      --bg: #0b0b0c;
+      --card: #141416;
+      --border: #2a2a2e;
+      --text: #e6e6e6;
+      --muted: #8b8b93;
+      --blue: #0e639c;
+      --blue-hover: #1177bb;
+      --blue-bright: #3794ff;
     }
+
     * { box-sizing: border-box; }
+
     body {
-      margin: 0; background: var(--bg); color: var(--text);
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
       font-family: "Segoe UI", system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
       font-size: 14px;
     }
-    .wrap { max-width: 1680px; margin: 0 auto; padding: 24px 20px 60px; }
+
+    .wrap {
+      max-width: 1680px;
+      margin: 0 auto;
+      padding: 24px 20px 60px;
+    }
+
     h1 { font-size: 18px; font-weight: 600; margin: 0 0 4px; }
     .sub { color: var(--muted); font-size: 13px; margin: 0 0 20px; }
+
     .layout {
-      display: grid; grid-template-columns: 340px minmax(0, 1fr);
-      gap: 20px; align-items: start;
+      display: grid;
+      grid-template-columns: 340px minmax(0, 1fr);
+      gap: 20px;
+      align-items: start;
     }
-    @media (max-width: 980px) { .layout { grid-template-columns: 1fr; } }
+    @media (max-width: 980px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+
     .card {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 10px; padding: 16px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
     }
+
     .preview-card {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 10px; padding: 16px; overflow: auto;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      overflow: auto;
     }
+
     label.lbl {
-      display: block; font-size: 11px; text-transform: uppercase;
-      letter-spacing: .05em; color: var(--muted); margin: 0 0 6px; font-weight: 700;
+      display: block;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: var(--muted);
+      margin: 0 0 6px;
+      font-weight: 700;
     }
+
     input[type=text], textarea {
-      width: 100%; background: #0e0e10; border: 1px solid var(--border);
-      border-radius: 6px; color: #e6e6e6; padding: 8px 10px;
+      width: 100%;
+      background: #0e0e10;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: #e6e6e6;
+      padding: 8px 10px;
       font-family: "Cascadia Mono", "Cascadia Code", Consolas, "Courier New", monospace;
-      font-size: 13px; resize: vertical; outline: none;
+      font-size: 13px;
+      resize: vertical;
+      outline: none;
     }
-    input[type=text]:focus, textarea:focus { border-color: var(--blue-bright); }
+    input[type=text]:focus,
+    textarea:focus { border-color: var(--blue-bright); }
+
     .field { margin-bottom: 14px; }
     textarea { min-height: 170px; line-height: 1.5; }
-    input[type=range] { width: 100%; accent-color: var(--blue-bright); cursor: pointer; }
+
+    input[type=range] {
+      width: 100%;
+      accent-color: var(--blue-bright);
+      cursor: pointer;
+    }
+
     .val {
-      float: right; font-family: Consolas, monospace;
-      font-size: 11px; color: var(--blue-bright);
+      float: right;
+      font-family: Consolas, monospace;
+      font-size: 11px;
+      color: var(--blue-bright);
     }
+
     .check {
-      display: flex; align-items: center; gap: 8px;
-      font-size: 13px; color: #c8c8c8; margin: 0 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: #c8c8c8;
+      margin: 0 0 16px;
     }
+
     input[type=checkbox] {
-      accent-color: var(--blue-bright); width: 15px; height: 15px; cursor: pointer;
+      accent-color: var(--blue-bright);
+      width: 15px;
+      height: 15px;
+      cursor: pointer;
     }
+
     .btns { display: flex; gap: 10px; flex-wrap: wrap; }
+
     button {
-      font: inherit; font-size: 13px; font-weight: 600;
-      border-radius: 6px; border: 1px solid transparent;
-      padding: 9px 14px; cursor: pointer;
-      background: #2a2a2e; color: #e6e6e6; transition: background .12s;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      padding: 9px 14px;
+      cursor: pointer;
+      background: #2a2a2e;
+      color: #e6e6e6;
+      transition: background .12s;
     }
     button.primary { background: var(--blue); color: #fff; }
     button.primary:hover { background: var(--blue-hover); }
+
     button.ghost {
-      background: transparent; border-color: var(--border); color: #c8c8c8;
+      background: transparent;
+      border-color: var(--border);
+      color: #c8c8c8;
     }
     button.ghost:hover { background: #1f1f22; }
     button:active { transform: translateY(1px); }
+
     #termCanvas {
-      display: block; max-width: 100%; height: auto;
-      border-radius: 6px; box-shadow: 0 12px 34px rgba(0,0,0,.6);
+      display: block;
+      max-width: 100%;
+      height: auto;
+      border-radius: 6px;
+      box-shadow: 0 12px 34px rgba(0, 0, 0, .6);
     }
-    .hint { color: var(--muted); font-size: 12px; margin: 14px 0 0; line-height: 1.55; }
-    .hint code { background: #1e1e22; padding: 1px 5px; border-radius: 4px; font-size: 11px; }
+
+    .hint {
+      color: var(--muted);
+      font-size: 12px;
+      margin: 14px 0 0;
+      line-height: 1.55;
+    }
+    .hint code {
+      background: #1e1e22;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 11px;
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
     <h1>SnapTerm → JPG</h1>
     <p class="sub">
-      Rendered with Cascadia Mono — the exact font VS Code uses on Windows.
+      Hollow ring matches real VS Code's shell-integration indicator.
     </p>
 
     <div class="layout">
@@ -128,7 +213,7 @@
 
         <div class="check">
           <input type="checkbox" id="cursor" checked />
-          <label for="cursor" style="margin:0;cursor:pointer">Show cursor block</label>
+          <label for="cursor" style="margin: 0; cursor: pointer">Show cursor block</label>
         </div>
 
         <div class="btns">
@@ -141,7 +226,7 @@
       <div class="preview-card">
         <canvas id="termCanvas"></canvas>
         <p class="hint">
-          Default font size 14px — matching VS Code's default terminal size.
+          Ring drawn with <code>ctx.stroke()</code> instead of <code>ctx.fill()</code>.
         </p>
       </div>
     </div>
@@ -154,28 +239,57 @@
       var DEFAULT_PROMPT = 'PS D:\\TEJ\\Study\\.INFORMATION TECHNOLOGY\\sem 3\\CODE\\FDS tejas\\exp 4> cd "d:\\TEJ\\Study\\.INFORMATION TECHNOLOGY\\sem 3\\CODE\\FDS tejas\\exp 4" ; if ($?) { g++ exp4_a.cpp -o exp4_a } ; if ($?) { .\\exp4_a }';
 
       var DEFAULT_OUTPUT = [
-        "===== MENU =====", "[1] Insert at Start", "[2] Insert at End",
-        "[3] Insert at Position", "[4] Delete at Start", "[5] Delete at End",
-        "[6] Delete at Position", "[7] Display", "[8] Exit",
+        "===== MENU =====",
+        "[1] Insert at Start",
+        "[2] Insert at End",
+        "[3] Insert at Position",
+        "[4] Delete at Start",
+        "[5] Delete at End",
+        "[6] Delete at Position",
+        "[7] Display",
+        "[8] Exit",
         "Enter your choice: "
       ].join("\n");
 
-      var HEADER_H = 35, GUTTER = 18, PAD_L = 6, PAD_R = 12, PAD_T = 4, PAD_B = 8;
+      // Panel geometry
+      var HEADER_H = 35;
+      var GUTTER = 18;
+      var PAD_L = 6;
+      var PAD_R = 12;
+      var PAD_T = 4;
+      var PAD_B = 8;
+
+      // Fonts
       var MONO = '"Cascadia Mono", "Cascadia Code", Consolas, "Courier New", monospace';
       var UI_FONT = '13px "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif';
-      var C_PANEL = "#181818", C_BORDER = "#2b2b2b";
-      var C_TAB = "#9d9d9d", C_TAB_ON = "#e7e7e7", C_TAB_BG = "#2b2b2b";
-      var C_TEXT = "#cccccc", C_ICON = "#c8c8c8", C_DOT = "#8a8a8a";
+
+      // VS Code Dark+ colours
+      var C_PANEL = "#181818";
+      var C_BORDER = "#2b2b2b";
+      var C_TAB = "#9d9d9d";
+      var C_TAB_ON = "#e7e7e7";
+      var C_TAB_BG = "#2b2b2b";
+      var C_TEXT = "#cccccc";
+      var C_ICON = "#c8c8c8";
+      var C_DOT = "#8a8a8a";
 
       function $(id) { return document.getElementById(id); }
 
       var els = {
-        prompt: $("prompt"), output: $("output"),
-        fontSize: $("fontSize"), panelWidth: $("panelWidth"),
-        bottomSpace: $("bottomSpace"), quality: $("quality"),
-        cursor: $("cursor"), fsVal: $("fsVal"), pwVal: $("pwVal"),
-        bsVal: $("bsVal"), qVal: $("qVal"),
-        dl: $("dl"), copy: $("copy"), reset: $("reset")
+        prompt: $("prompt"),
+        output: $("output"),
+        fontSize: $("fontSize"),
+        panelWidth: $("panelWidth"),
+        bottomSpace: $("bottomSpace"),
+        quality: $("quality"),
+        cursor: $("cursor"),
+        fsVal: $("fsVal"),
+        pwVal: $("pwVal"),
+        bsVal: $("bsVal"),
+        qVal: $("qVal"),
+        dl: $("dl"),
+        copy: $("copy"),
+        reset: $("reset")
       };
 
       var canvas = $("termCanvas");
@@ -185,10 +299,16 @@
       function wrapChars(text, maxChars) {
         var out = [];
         var paras = String(text)
-          .replace(/\r\n?/g, "\n").replace(/\t/g, "    ").split("\n");
+          .replace(/\r\n?/g, "\n")
+          .replace(/\t/g, "    ")
+          .split("\n");
+
         for (var p = 0; p < paras.length; p++) {
           var para = paras[p];
-          if (para.length === 0) { out.push(""); continue; }
+          if (para.length === 0) {
+            out.push("");
+            continue;
+          }
           for (var i = 0; i < para.length; i += maxChars) {
             out.push(para.slice(i, i + maxChars));
           }
@@ -219,7 +339,8 @@
       }
 
       function drawChevron(cx, cy, dir) {
-        var w = 4.5, h = 2.5, d = dir === "down" ? 1 : -1;
+        var w = 4.5, h = 2.5;
+        var d = dir === "down" ? 1 : -1;
         ctx.beginPath();
         ctx.moveTo(cx - w, cy - h * d);
         ctx.lineTo(cx, cy + h * d);
@@ -235,33 +356,40 @@
         ctx.stroke();
       }
 
+      /** Problems | Debug Console | Terminal ... + ⌄ ⌃ ✕ */
       function drawHeader(W) {
         ctx.font = UI_FONT;
         ctx.textBaseline = "middle";
+
         var tabs = [
           ["Problems", false],
           ["Debug Console", false],
           ["Terminal", true]
         ];
+
         var x = 0;
         for (var i = 0; i < tabs.length; i++) {
           var label = tabs[i][0];
           var active = tabs[i][1];
           var tw = ctx.measureText(label).width + 22;
+
           if (active) {
             ctx.fillStyle = C_TAB_BG;
             roundRect(x + 3, 5, tw - 6, HEADER_H - 10, 5);
             ctx.fill();
           }
+
           ctx.fillStyle = active ? C_TAB_ON : C_TAB;
           ctx.fillText(label, x + 11, HEADER_H / 2 + 1);
           x += tw;
         }
+
         var iy = Math.round(HEADER_H / 2);
         ctx.strokeStyle = C_ICON;
         ctx.lineWidth = 1.2;
         ctx.lineCap = "round";
         ctx.lineJoin = "round";
+
         var cx = W - 16;
         drawClose(cx, iy);           cx -= 28;
         drawChevron(cx, iy, "up");   cx -= 28;
@@ -296,7 +424,10 @@
 
           var cursorLine = lines.length - 1;
           var cursorCol = (lines[cursorLine] || "").length;
-          if (cursorCol >= maxChars) { cursorLine++; cursorCol = 0; }
+          if (cursorCol >= maxChars) {
+            cursorLine++;
+            cursorCol = 0;
+          }
 
           var bodyLines = Math.max(lines.length, showCursor ? cursorLine + 1 : 0);
           var H = HEADER_H + PAD_T + bodyLines * lineH + PAD_B + bottomSpace;
@@ -315,20 +446,24 @@
           ctx.imageSmoothingQuality = "high";
           ctx.textRendering = "geometricPrecision";
 
-          ctx.fillStyle = C_PANEL; ctx.fillRect(0, 0, panelW, H);
-          ctx.fillStyle = C_BORDER; ctx.fillRect(0, 0, panelW, 1);
+          ctx.fillStyle = C_PANEL;
+          ctx.fillRect(0, 0, panelW, H);
+          ctx.fillStyle = C_BORDER;
+          ctx.fillRect(0, 0, panelW, 1);
 
           drawHeader(panelW);
 
           var startY = HEADER_H + PAD_T;
 
+          // Hollow ring (stroke instead of fill)
           if (prompt.length > 0 && lines.length > 0) {
             var dotCx = PAD_L + GUTTER / 2 + 1;
             var dotCy = startY + lineH / 2;
             ctx.beginPath();
-            ctx.arc(dotCx, dotCy, 4, 0, Math.PI * 2);
-            ctx.fillStyle = C_DOT;
-            ctx.fill();
+            ctx.arc(dotCx, dotCy, 4.5, 0, Math.PI * 2);
+            ctx.strokeStyle = C_DOT;
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
           }
 
           ctx.font = bodyFont;
@@ -347,22 +482,31 @@
             ctx.fillStyle = C_TEXT;
             ctx.fillRect(textLeft + cursorCol * charW, cy + (lineH - ch) / 2, charW, ch);
           }
-        } catch (err) { console.error("Render error:", err); }
+        } catch (err) {
+          console.error("Render error:", err);
+        }
       }
 
       function download() {
         try {
           var q = Math.max(0.01, Math.min(1, (+els.quality.value) / 100));
+
+          // Composite over panel bg first — JPEG has no alpha channel
           var tmp = document.createElement("canvas");
-          tmp.width = canvas.width; tmp.height = canvas.height;
+          tmp.width = canvas.width;
+          tmp.height = canvas.height;
           var tctx = tmp.getContext("2d");
           tctx.fillStyle = "#181818";
           tctx.fillRect(0, 0, tmp.width, tmp.height);
           tctx.drawImage(canvas, 0, 0);
+
           var dataUrl = tmp.toDataURL("image/jpeg", q);
           var a = document.createElement("a");
-          a.href = dataUrl; a.download = "snapterm.jpg";
-          document.body.appendChild(a); a.click(); document.body.removeChild(a);
+          a.href = dataUrl;
+          a.download = "snapterm.jpg";
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
         } catch (err) {
           console.error("Download error:", err);
           alert("Download failed: " + err.message);
@@ -401,8 +545,10 @@
       }
 
       function bind() {
-        var inputs = [els.prompt, els.output, els.fontSize, els.panelWidth,
-                      els.bottomSpace, els.quality, els.cursor];
+        var inputs = [
+          els.prompt, els.output, els.fontSize, els.panelWidth,
+          els.bottomSpace, els.quality, els.cursor
+        ];
         for (var i = 0; i < inputs.length; i++) {
           inputs[i].addEventListener("input", render);
           inputs[i].addEventListener("change", render);
@@ -421,7 +567,9 @@
 
       if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", init);
-      } else { init(); }
+      } else {
+        init();
+      }
     })();
   </script>
 </body>
