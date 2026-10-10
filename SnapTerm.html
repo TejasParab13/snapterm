@@ -1,0 +1,90 @@
+<!-- COMMIT: Recreate VS Code terminal panel with PNG export -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SnapTerm — VS Code Terminal → PNG</title>
+<style>
+  :root{--bg:#0b0b0c;--card:#141416;--border:#2a2a2e;--text:#e6e6e6;--muted:#8b8b93;--blue:#0e639c;--blue-hover:#1177bb;--blue-bright:#3794ff;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:"Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;font-size:14px}
+  .wrap{max-width:1680px;margin:0 auto;padding:24px 20px 60px}
+  h1{font-size:18px;font-weight:600;margin:0 0 4px}
+  .sub{color:var(--muted);font-size:13px;margin:0 0 20px}
+  .layout{display:grid;grid-template-columns:340px minmax(0,1fr);gap:20px;align-items:start}
+  @media (max-width:980px){.layout{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px}
+  .preview-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;overflow:auto}
+  label.lbl{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:0 0 6px;font-weight:700}
+  input[type=text],textarea{width:100%;background:#0e0e10;border:1px solid var(--border);border-radius:6px;color:#e6e6e6;padding:8px 10px;font-family:Consolas,"Cascadia Mono","Courier New",monospace;font-size:13px;resize:vertical;outline:none}
+  input[type=text]:focus,textarea:focus{border-color:var(--blue-bright)}
+  .field{margin-bottom:14px}
+  textarea{min-height:170px;line-height:1.5}
+  input[type=range]{width:100%;accent-color:var(--blue-bright);cursor:pointer}
+  .val{float:right;font-family:Consolas,monospace;font-size:11px;color:var(--blue-bright)}
+  .check{display:flex;align-items:center;gap:8px;font-size:13px;color:#c8c8c8;margin:0 0 16px}
+  input[type=checkbox]{accent-color:var(--blue-bright);width:15px;height:15px;cursor:pointer}
+  .btns{display:flex;gap:10px;flex-wrap:wrap}
+  button{font:inherit;font-size:13px;font-weight:600;border-radius:6px;border:1px solid transparent;padding:9px 14px;cursor:pointer;background:#2a2a2e;color:#e6e6e6;transition:background .12s}
+  button.primary{background:var(--blue);color:#fff}
+  button.primary:hover{background:var(--blue-hover)}
+  button.ghost{background:transparent;border-color:var(--border);color:#c8c8c8}
+  button.ghost:hover{background:#1f1f22}
+  button:active{transform:translateY(1px)}
+  #termCanvas{display:block;max-width:100%;height:auto;border-radius:6px;box-shadow:0 12px 34px rgba(0,0,0,.6)}
+  .hint{color:var(--muted);font-size:12px;margin:14px 0 0;line-height:1.55}
+  .hint code{background:#1e1e22;padding:1px 5px;border-radius:4px;font-size:11px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>SnapTerm → PNG</h1>
+  <p class="sub">Paste your program output, get a pixel-accurate VS Code terminal panel and download the whole thing as one image.</p>
+  <div class="layout">
+    <div class="card">
+      <div class="field"><label class="lbl" for="prompt">Prompt / command line</label><input type="text" id="prompt" spellcheck="false" /></div>
+      <div class="field"><label class="lbl" for="output">Terminal output</label><textarea id="output" spellcheck="false"></textarea></div>
+      <div class="field"><label class="lbl" for="fontSize">Font size <span class="val" id="fsVal">13px</span></label><input type="range" id="fontSize" min="10" max="22" step="1" value="13" /></div>
+      <div class="field"><label class="lbl" for="panelWidth">Panel width <span class="val" id="pwVal">1500px</span></label><input type="range" id="panelWidth" min="700" max="2400" step="10" value="1500" /></div>
+      <div class="check"><input type="checkbox" id="cursor" checked /><label for="cursor" style="margin:0;cursor:pointer">Show cursor block</label></div>
+      <div class="btns">
+        <button class="primary" id="dl">⬇ Download PNG</button>
+        <button class="ghost" id="copy">Copy image</button>
+        <button class="ghost" id="reset">Reset</button>
+      </div>
+    </div>
+    <div class="preview-card">
+      <canvas id="termCanvas"></canvas>
+      <p class="hint">The preview <em>is</em> the exported file — same pixels, same full height. Rendered at <code>2×</code> for crisp text.</p>
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  "use strict";
+  var DEFAULT_PROMPT = String.raw`PS D:\TEJ\Study\.INFORMATION TECHNOLOGY\sem 3\CODE\FDS tejas\exp 4> cd "d:\TEJ\Study\.INFORMATION TECHNOLOGY\sem 3\CODE\FDS tejas\exp 4" ; if ($?) { g++ exp4_a.cpp -o exp4_a } ; if ($?) { .\exp4_a }`;
+  var DEFAULT_OUTPUT = ["===== MENU =====","[1] Insert at Start","[2] Insert at End","[3] Insert at Position","[4] Delete at Start","[5] Delete at End","[6] Delete at Position","[7] Display","[8] Exit","Enter your choice: "].join("\n");
+  var HEADER_H=35,PAD_L=10,PAD_R=10,PAD_T=6,PAD_B=10;
+  var MONO='Consolas, "Cascadia Mono", "Courier New", monospace';
+  var UI_FONT='13px "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif';
+  var C_PANEL="#181818",C_BORDER="#2b2b2b",C_TAB="#9d9d9d",C_TAB_ON="#e7e7e7",C_ACCENT="#0078d4",C_TEXT="#cccccc",C_ICON="#c8c8c8";
+  var $=function(id){return document.getElementById(id)};
+  var els={prompt:$("prompt"),output:$("output"),fontSize:$("fontSize"),panelWidth:$("panelWidth"),cursor:$("cursor"),fsVal:$("fsVal"),pwVal:$("pwVal"),dl:$("dl"),copy:$("copy"),reset:$("reset")};
+  var canvas=$("termCanvas"),ctx=canvas.getContext("2d"),meas=document.createElement("canvas").getContext("2d");
+  function wrapChars(t,m){var o=[],p=String(t).replace(/\r\n?/g,"\n").replace(/\t/g,"    ").split("\n");for(var i=0;i<p.length;i++){var s=p[i];if(!s.length){o.push("");continue}for(var j=0;j<s.length;j+=m)o.push(s.slice(j,j+m))}return o.length?o:[""]}
+  function drawPlus(cx,cy){var r=5.5;ctx.beginPath();ctx.moveTo(cx-r,cy);ctx.lineTo(cx+r,cy);ctx.moveTo(cx,cy-r);ctx.lineTo(cx,cy+r);ctx.stroke()}
+  function drawChevron(cx,cy,d){var w=4.5,h=2.5,s=d==="down"?1:-1;ctx.beginPath();ctx.moveTo(cx-w,cy-h*s);ctx.lineTo(cx,cy+h*s);ctx.lineTo(cx+w,cy-h*s);ctx.stroke()}
+  function drawClose(cx,cy){var r=4.5;ctx.beginPath();ctx.moveTo(cx-r,cy-r);ctx.lineTo(cx+r,cy+r);ctx.moveTo(cx+r,cy-r);ctx.lineTo(cx-r,cy+r);ctx.stroke()}
+  function drawHeader(W){ctx.font=UI_FONT;ctx.textBaseline="middle";var tabs=[["Problems",false],["Debug Console",false],["Terminal",true]],x=0;for(var i=0;i<tabs.length;i++){var l=tabs[i][0],a=tabs[i][1],tw=ctx.measureText(l).width+20;if(a){ctx.fillStyle=C_ACCENT;ctx.fillRect(x,HEADER_H-1,tw,1)}ctx.fillStyle=a?C_TAB_ON:C_TAB;ctx.fillText(l,x+10,HEADER_H/2+1);x+=tw}var iy=Math.round(HEADER_H/2);ctx.strokeStyle=C_ICON;ctx.lineWidth=1.2;ctx.lineCap="round";ctx.lineJoin="round";var cx=W-16;drawClose(cx,iy);cx-=28;drawChevron(cx,iy,"up");cx-=28;drawChevron(cx,iy,"down");cx-=28;drawPlus(cx,iy)}
+  function render(){var fs=+els.fontSize.value,pw=+els.panelWidth.value,sc=els.cursor.checked,prompt=els.prompt.value,output=els.output.value;els.fsVal.textContent=fs+"px";els.pwVal.textContent=pw+"px";var lineH=Math.round(fs*1.35),bf=fs+"px "+MONO;meas.font=bf;var charW=meas.measureText("M").width||fs*0.6;var maxChars=Math.max(10,Math.floor((pw-PAD_L-PAD_R)/charW));var raw=prompt.length?prompt+"\n"+output:output;var lines=wrapChars(raw,maxChars);var cl=lines.length-1,cc=(lines[cl]||"").length;if(cc>=maxChars){cl++;cc=0}var bodyLines=Math.max(lines.length,sc?cl+1:0);var H=Math.max(HEADER_H+PAD_T+bodyLines*lineH+PAD_B,140);var S=2;if(pw*S*H*S>2.0e8)S=1;canvas.width=Math.round(pw*S);canvas.height=Math.round(H*S);canvas.style.width=pw+"px";canvas.style.height="auto";ctx.setTransform(S,0,0,S,0,0);ctx.fillStyle=C_PANEL;ctx.fillRect(0,0,pw,H);ctx.fillStyle=C_BORDER;ctx.fillRect(0,0,pw,1);drawHeader(pw);ctx.font=bf;ctx.textBaseline="middle";ctx.fillStyle=C_TEXT;var startY=HEADER_H+PAD_T;for(var i=0;i<lines.length;i++){if(lines[i])ctx.fillText(lines[i],PAD_L,startY+i*lineH+lineH/2)}if(sc){var cy=startY+cl*lineH,ch=Math.round(fs*1.15);ctx.fillStyle=C_TEXT;ctx.fillRect(PAD_L+cc*charW,cy+(lineH-ch)/2,charW,ch)}}
+  function download(){canvas.toBlob(function(blob){var url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="snapterm.png";document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},5000)},"image/png")}
+  function copyImage(){var o=els.copy.textContent;canvas.toBlob(function(blob){if(!navigator.clipboard||!window.ClipboardItem){els.copy.textContent="Not supported";setTimeout(function(){els.copy.textContent=o},1500);return}navigator.clipboard.write([new ClipboardItem({"image/png":blob})]).then(function(){els.copy.textContent="✓ Copied";setTimeout(function(){els.copy.textContent=o},1500)}).catch(function(){els.copy.textContent="Use Download";setTimeout(function(){els.copy.textContent=o},1500)})},"image/png")}
+  function reset(){els.prompt.value=DEFAULT_PROMPT;els.output.value=DEFAULT_OUTPUT;els.fontSize.value=13;els.panelWidth.value=1500;els.cursor.checked=true;render()}
+  ["input","change"].forEach(function(e){els.prompt.addEventListener(e,render);els.output.addEventListener(e,render);els.fontSize.addEventListener(e,render);els.panelWidth.addEventListener(e,render);els.cursor.addEventListener(e,render)});
+  els.dl.addEventListener("click",download);els.copy.addEventListener("click",copyImage);els.reset.addEventListener("click",reset);
+  els.prompt.value=DEFAULT_PROMPT;els.output.value=DEFAULT_OUTPUT;render();
+})();
+</script>
+</body>
+</html>
