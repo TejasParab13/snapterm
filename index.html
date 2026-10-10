@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
   <title>SnapTerm — VS Code terminal screenshots</title>
-  <meta name="description" content="Generate pixel-accurate VS Code terminal screenshots from pasted text. Runs entirely in your browser." />
+  <meta name="description" content="Generate pixel-accurate VS Code terminal screenshots from pasted text." />
   <style>
     :root {
       --bg: #0a0a0b;
@@ -49,14 +49,13 @@
       height: 100dvh;
       width: 100%;
       margin: 0;
-      padding: 16px 16px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
       gap: 16px;
       z-index: 1;
     }
 
-    /* ===================== Brand ===================== */
     .brand {
       flex-shrink: 0;
       display: flex;
@@ -93,13 +92,9 @@
       color: var(--muted);
     }
 
-    /* ===================== Layout ===================== */
-    .layout {
-      flex: 1;
-      min-height: 0;
-    }
+    .layout { flex: 1; min-height: 0; }
 
-    /* ===================== Tabs ===================== */
+    /* ===== Tabs ===== */
     .tabs {
       display: flex;
       gap: 4px;
@@ -137,14 +132,9 @@
       box-shadow: 0 4px 14px rgba(55, 148, 255, .25);
     }
 
-    .tab svg {
-      width: 15px;
-      height: 15px;
-      fill: currentColor;
-      flex-shrink: 0;
-    }
+    .tab svg { width: 15px; height: 15px; fill: currentColor; flex-shrink: 0; }
 
-    /* ===================== Panels ===================== */
+    /* ===== Panels ===== */
     .panel {
       display: none;
       flex-direction: column;
@@ -172,12 +162,58 @@
       justify-content: center;
     }
 
+    .canvas-wrap {
+      position: relative;
+      display: inline-block;
+      max-width: 100%;
+      line-height: 0;
+    }
+
     #termCanvas {
       display: block;
       max-width: 100%;
       height: auto;
       border-radius: 8px;
       box-shadow: var(--shadow);
+    }
+
+    /* Mobile + crop: clip the cropped side, scale visible region to fill */
+    .canvas-wrap.cropping {
+      width: 100%;
+      max-width: 100%;
+      overflow: hidden;
+    }
+    .canvas-wrap.cropping #termCanvas {
+      max-width: none;
+      border-radius: 8px 0 0 8px;
+    }
+    /* Hide overlays when we're actually clipping them away */
+    .canvas-wrap.cropping .crop-overlay,
+    .canvas-wrap.cropping .crop-line {
+      display: none !important;
+    }
+
+    .crop-overlay {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      background: rgba(0, 0, 0, .55);
+      backdrop-filter: blur(1px);
+      pointer-events: none;
+      border-top-right-radius: 8px;
+      border-bottom-right-radius: 8px;
+      display: none;
+    }
+
+    .crop-line {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 0;
+      border-left: 1.5px dashed var(--accent);
+      pointer-events: none;
+      display: none;
     }
 
     .info-bar {
@@ -208,16 +244,8 @@
       background: var(--border-2);
     }
 
-    /* Editor panels */
-    .editor-panel textarea {
-      flex: 1;
-      min-height: 0;
-      resize: none;
-    }
-
-    .editor-panel input[type=text] {
-      min-height: 44px;
-    }
+    .editor-panel textarea { flex: 1; min-height: 0; resize: none; }
+    .editor-panel input[type=text] { min-height: 44px; }
 
     label.lbl {
       display: flex;
@@ -250,7 +278,7 @@
       box-shadow: 0 0 0 3px rgba(55, 148, 255, .15);
     }
 
-    /* ===================== Side tools ===================== */
+    /* ===== Side tools ===== */
     .side-tools {
       display: flex;
       flex-direction: column;
@@ -288,9 +316,7 @@
       transition: transform .2s;
     }
 
-    .settings.open .settings-toggle .chevron {
-      transform: rotate(180deg);
-    }
+    .settings.open .settings-toggle .chevron { transform: rotate(180deg); }
 
     .settings-body {
       padding: 16px;
@@ -299,11 +325,7 @@
       gap: 14px;
     }
 
-    .setting {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
+    .setting { display: flex; flex-direction: column; gap: 6px; }
 
     .setting-label {
       display: flex;
@@ -312,6 +334,47 @@
       font-size: 12px;
       font-weight: 600;
       color: var(--text-2);
+      gap: 8px;
+    }
+
+    .setting-label > span:first-child { flex: 1; }
+
+    .setting-label-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .slider-reset {
+      display: grid;
+      place-items: center;
+      width: 22px;
+      height: 22px;
+      padding: 0;
+      background: transparent;
+      border: 1px solid var(--border-2);
+      border-radius: 5px;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .12s;
+      flex-shrink: 0;
+    }
+
+    .slider-reset svg { width: 11px; height: 11px; fill: currentColor; }
+
+    .slider-reset:hover:not(:disabled) {
+      color: var(--accent);
+      border-color: var(--accent);
+      background: rgba(55, 148, 255, .08);
+    }
+
+    .slider-reset:active:not(:disabled) { transform: scale(.92); }
+
+    .slider-reset:disabled {
+      opacity: .35;
+      cursor: not-allowed;
+      pointer-events: none;
     }
 
     .val {
@@ -321,6 +384,8 @@
       background: rgba(55, 148, 255, .1);
       padding: 2px 7px;
       border-radius: 4px;
+      min-width: 46px;
+      text-align: center;
     }
 
     input[type=range] {
@@ -421,12 +486,8 @@
       transform: rotate(45deg);
     }
 
-    /* ===================== Actions ===================== */
-    .actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
+    /* ===== Actions ===== */
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; }
 
     button {
       display: inline-flex;
@@ -471,7 +532,7 @@
 
     button svg { width: 15px; height: 15px; fill: currentColor; }
 
-    /* ===================== Toast ===================== */
+    /* ===== Toast ===== */
     .toast {
       position: fixed;
       left: 50%;
@@ -491,15 +552,10 @@
       z-index: 200;
     }
 
-    .toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
     .toast.success { border-color: var(--success); }
     .toast.error { border-color: #a33333; }
 
-    /* Scrollbars */
     ::-webkit-scrollbar { width: 10px; height: 10px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb {
@@ -509,10 +565,7 @@
     }
     ::-webkit-scrollbar-thumb:hover { background: #4a4a52; }
 
-    /* =====================
-       DESKTOP (≥901px):
-       2-column grid. Left = tabs + editor + tools. Right = preview (always on).
-       ===================== */
+    /* ===== Desktop (≥901px) ===== */
     @media (min-width: 901px) {
       .layout {
         display: grid;
@@ -524,30 +577,17 @@
           "tools    preview";
         gap: 12px 20px;
       }
-
       .tabs { grid-area: tabs; }
       .side-tools { grid-area: tools; }
-
       .panel[data-panel="terminal"],
-      .panel[data-panel="prompt"] {
-        grid-area: editor;
-      }
-
-      .panel[data-panel="preview"] {
-        grid-area: preview;
-      }
-
-      /* Preview tab and preview panel are handled by JS on desktop */
+      .panel[data-panel="prompt"] { grid-area: editor; }
+      .panel[data-panel="preview"] { grid-area: preview; }
       .tab[data-tab="preview"] { display: none; }
     }
 
-    /* =====================
-       MOBILE (≤900px):
-       Single column. All 3 tabs visible. Settings collapsible.
-       ===================== */
+    /* ===== Mobile (≤900px) ===== */
     @media (max-width: 900px) {
       .app { padding: 12px; gap: 12px; }
-
       .brand-mark { width: 34px; height: 34px; font-size: 13px; }
       .brand h1 { font-size: 16px; }
       .brand p { display: none; }
@@ -568,11 +608,7 @@
         flex-shrink: 0;
       }
 
-      .tab {
-        padding: 10px 6px;
-        font-size: 12.5px;
-      }
-
+      .tab { padding: 10px 6px; font-size: 12.5px; }
       .tab svg { display: none; }
 
       .panel {
@@ -583,11 +619,7 @@
         border-radius: 12px;
       }
 
-      .side-tools {
-        order: 3;
-        flex-shrink: 0;
-        gap: 10px;
-      }
+      .side-tools { order: 3; flex-shrink: 0; gap: 10px; }
 
       .settings-toggle { display: flex; }
       .settings-body {
@@ -620,7 +652,6 @@
 
     <div class="layout">
 
-      <!-- Tabs -->
       <nav class="tabs" id="tabs">
         <button class="tab" data-tab="preview" type="button">
           <svg viewBox="0 0 16 16" aria-hidden="true">
@@ -642,33 +673,35 @@
         </button>
       </nav>
 
-      <!-- Terminal editor -->
       <section class="panel editor-panel" data-panel="terminal">
         <label class="lbl" for="outputFull">Terminal output</label>
         <textarea id="outputFull" spellcheck="false" placeholder="Paste your program output…"></textarea>
       </section>
 
-      <!-- Prompt editor -->
       <section class="panel editor-panel" data-panel="prompt">
         <label class="lbl" for="promptInput">Prompt / command line</label>
         <input type="text" id="promptInput" spellcheck="false" />
       </section>
 
-      <!-- Preview panel -->
       <section class="panel" data-panel="preview">
         <div class="canvas-scroll">
-          <canvas id="termCanvas"></canvas>
+          <div class="canvas-wrap" id="canvasWrap">
+            <canvas id="termCanvas"></canvas>
+            <div class="crop-overlay" id="cropOverlay"></div>
+            <div class="crop-line" id="cropLine"></div>
+          </div>
         </div>
         <div class="info-bar">
           <span>Size: <b id="dimInfo">—</b></span>
           <span class="dot"></span>
           <span>Lines: <b id="lineInfo">—</b></span>
           <span class="dot"></span>
+          <span>Crop: <b id="cropInfo">0%</b></span>
+          <span class="dot"></span>
           <span>JPEG · 95%</span>
         </div>
       </section>
 
-      <!-- Side tools -->
       <aside class="side-tools">
 
         <section class="settings" id="settings">
@@ -681,17 +714,35 @@
 
           <div class="settings-body">
 
+            <!-- Font size -->
             <div class="setting">
-              <label class="setting-label" for="fontSize">
-                Font size <span class="val" id="fsVal">14px</span>
-              </label>
+              <div class="setting-label">
+                <span>Font size</span>
+                <div class="setting-label-right">
+                  <span class="val" id="fsVal">14px</span>
+                  <button class="slider-reset" type="button" title="Reset font size" data-target="fontSize" data-default="14">
+                    <svg viewBox="0 0 16 16" aria-hidden="true">
+                      <path d="M8 3a5 5 0 1 0 4.546 2.914.75.75 0 0 1 1.302-.746A6.5 6.5 0 1 1 8 1.5V.75a.25.25 0 0 1 .41-.19l2.5 2.5a.25.25 0 0 1 0 .38l-2.5 2.5A.25.25 0 0 1 8 5.75V3Z"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
               <input type="range" id="fontSize" min="10" max="22" step="1" value="14" />
             </div>
 
+            <!-- Panel width -->
             <div class="setting">
-              <label class="setting-label" for="panelWidth">
-                Panel width <span class="val" id="pwVal">1500px</span>
-              </label>
+              <div class="setting-label">
+                <span>Panel width</span>
+                <div class="setting-label-right">
+                  <span class="val" id="pwVal">1500px</span>
+                  <button class="slider-reset" type="button" title="Reset panel width" data-target="panelWidth" data-default="1500">
+                    <svg viewBox="0 0 16 16" aria-hidden="true">
+                      <path d="M8 3a5 5 0 1 0 4.546 2.914.75.75 0 0 1 1.302-.746A6.5 6.5 0 1 1 8 1.5V.75a.25.25 0 0 1 .41-.19l2.5 2.5a.25.25 0 0 1 0 .38l-2.5 2.5A.25.25 0 0 1 8 5.75V3Z"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
               <input type="range" id="panelWidth" min="700" max="2600" step="10" value="1500" />
               <div class="presets" id="presets">
                 <button class="preset" data-w="1000" type="button">1080p</button>
@@ -701,11 +752,36 @@
               </div>
             </div>
 
+            <!-- Bottom space -->
             <div class="setting">
-              <label class="setting-label" for="bottomSpace">
-                Bottom space <span class="val" id="bsVal">0px</span>
-              </label>
+              <div class="setting-label">
+                <span>Bottom space</span>
+                <div class="setting-label-right">
+                  <span class="val" id="bsVal">0px</span>
+                  <button class="slider-reset" type="button" title="Reset bottom space" data-target="bottomSpace" data-default="0">
+                    <svg viewBox="0 0 16 16" aria-hidden="true">
+                      <path d="M8 3a5 5 0 1 0 4.546 2.914.75.75 0 0 1 1.302-.746A6.5 6.5 0 1 1 8 1.5V.75a.25.25 0 0 1 .41-.19l2.5 2.5a.25.25 0 0 1 0 .38l-2.5 2.5A.25.25 0 0 1 8 5.75V3Z"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
               <input type="range" id="bottomSpace" min="0" max="800" step="10" value="0" />
+            </div>
+
+            <!-- Crop from right -->
+            <div class="setting">
+              <div class="setting-label">
+                <span>Crop from right</span>
+                <div class="setting-label-right">
+                  <span class="val" id="crVal">0%</span>
+                  <button class="slider-reset" type="button" title="Reset crop" data-target="cropRight" data-default="0">
+                    <svg viewBox="0 0 16 16" aria-hidden="true">
+                      <path d="M8 3a5 5 0 1 0 4.546 2.914.75.75 0 0 1 1.302-.746A6.5 6.5 0 1 1 8 1.5V.75a.25.25 0 0 1 .41-.19l2.5 2.5a.25.25 0 0 1 0 .38l-2.5 2.5A.25.25 0 0 1 8 5.75V3Z"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <input type="range" id="cropRight" min="0" max="95" step="5" value="0" />
             </div>
 
             <div class="setting">
@@ -799,13 +875,16 @@
         fontSize: $("fontSize"),
         panelWidth: $("panelWidth"),
         bottomSpace: $("bottomSpace"),
+        cropRight: $("cropRight"),
         cursor: $("cursor"),
 
         fsVal: $("fsVal"),
         pwVal: $("pwVal"),
         bsVal: $("bsVal"),
+        crVal: $("crVal"),
         dimInfo: $("dimInfo"),
         lineInfo: $("lineInfo"),
+        cropInfo: $("cropInfo"),
 
         presets: $("presets"),
         dl: $("dl"),
@@ -815,6 +894,10 @@
         settings: $("settings"),
         settingsToggle: $("settingsToggle"),
 
+        canvasWrap: $("canvasWrap"),
+        cropOverlay: $("cropOverlay"),
+        cropLine: $("cropLine"),
+
         toast: $("toast")
       };
 
@@ -822,25 +905,18 @@
       var ctx = canvas.getContext("2d");
       var meas = document.createElement("canvas").getContext("2d");
 
-      /* ---------- Active tab state ----------------------------------- */
       var currentTab = isMobile() ? "preview" : "terminal";
 
       function applyLayout() {
         var mobile = isMobile();
-
-        // Tabs
         for (var i = 0; i < els.tabButtons.length; i++) {
           var t = els.tabButtons[i];
           t.classList.toggle("active", t.dataset.tab === currentTab);
         }
-
-        // Panels
         for (var j = 0; j < els.panels.length; j++) {
           var p = els.panels[j];
           var name = p.dataset.panel;
-
           if (!mobile && name === "preview") {
-            // Desktop: preview always visible
             p.classList.add("active");
           } else {
             p.classList.toggle("active", name === currentTab);
@@ -855,10 +931,11 @@
       }
 
       window.addEventListener("resize", function () {
-        if (!isMobile() && currentTab === "preview") {
-          currentTab = "terminal";
-        }
+        if (!isMobile() && currentTab === "preview") currentTab = "terminal";
         applyLayout();
+        // Recompute crop display when the layout breakpoint changes
+        updateCanvasDisplay(+els.panelWidth.value, +els.cropRight.value);
+        updateCropOverlay(+els.cropRight.value);
       });
 
       /* ---------- Toast ---------------------------------------------- */
@@ -879,7 +956,6 @@
           .replace(/\r\n?/g, "\n")
           .replace(/\t/g, "    ")
           .split("\n");
-
         for (var p = 0; p < paras.length; p++) {
           var para = paras[p];
           if (para.length === 0) { out.push(""); continue; }
@@ -934,41 +1010,75 @@
       function drawHeader(W) {
         ctx.font = UI_FONT;
         ctx.textBaseline = "middle";
-
-        var tabs = [
-          ["Problems", false],
-          ["Debug Console", false],
-          ["Terminal", true]
-        ];
-
+        var tabs = [["Problems", false], ["Debug Console", false], ["Terminal", true]];
         var x = 0;
         for (var i = 0; i < tabs.length; i++) {
           var label = tabs[i][0];
           var active = tabs[i][1];
           var tw = ctx.measureText(label).width + 22;
-
           if (active) {
             ctx.fillStyle = C_TAB_BG;
             roundRect(x + 3, 5, tw - 6, HEADER_H - 10, 5);
             ctx.fill();
           }
-
           ctx.fillStyle = active ? C_TAB_ON : C_TAB;
           ctx.fillText(label, x + 11, HEADER_H / 2 + 1);
           x += tw;
         }
-
         var iy = Math.round(HEADER_H / 2);
         ctx.strokeStyle = C_ICON;
         ctx.lineWidth = 1.2;
         ctx.lineCap = "round";
         ctx.lineJoin = "round";
-
         var cx = W - 16;
         drawClose(cx, iy);           cx -= 28;
         drawChevron(cx, iy, "up");   cx -= 28;
         drawChevron(cx, iy, "down"); cx -= 28;
         drawPlus(cx, iy);
+      }
+
+      /* ---------- Reset button state --------------------------------- */
+      function refreshResetButtons() {
+        var resets = document.querySelectorAll(".slider-reset");
+        for (var i = 0; i < resets.length; i++) {
+          var btn = resets[i];
+          var targetId = btn.dataset.target;
+          var def = +btn.dataset.default;
+          var current = +els[targetId].value;
+          btn.disabled = (current === def);
+        }
+      }
+
+      /* ---------- Canvas display mode (mobile crop) ------------------ */
+      function updateCanvasDisplay(panelW, cropPct) {
+        if (isMobile() && cropPct > 0) {
+          // Show only the visible (left) portion of the canvas — scaled up
+          var visibleFrac = 1 - cropPct / 100;
+          els.canvasWrap.classList.add("cropping");
+          canvas.style.width = (100 / visibleFrac) + "%";
+          canvas.style.maxWidth = "none";
+        } else {
+          els.canvasWrap.classList.remove("cropping");
+          canvas.style.width = panelW + "px";
+          canvas.style.maxWidth = "";
+        }
+      }
+
+      /* ---------- Crop overlay (desktop only) ------------------------ */
+      function updateCropOverlay(cropPct) {
+        // On mobile, the cropped region is hidden entirely — no overlay needed
+        if (isMobile() || cropPct <= 0) {
+          els.cropOverlay.style.display = "none";
+          els.cropLine.style.display = "none";
+          return;
+        }
+        var canvasRect = canvas.getBoundingClientRect();
+        var renderedW = canvasRect.width;
+        var cropPx = renderedW * (cropPct / 100);
+        els.cropOverlay.style.display = "block";
+        els.cropOverlay.style.width = cropPx + "px";
+        els.cropLine.style.display = "block";
+        els.cropLine.style.right = cropPx + "px";
       }
 
       /* ---------- Render --------------------------------------------- */
@@ -977,6 +1087,7 @@
           var fontSize = +els.fontSize.value;
           var panelW = +els.panelWidth.value;
           var bottomSpace = +els.bottomSpace.value;
+          var cropPct = +els.cropRight.value;
           var showCursor = els.cursor.checked;
           var prompt = els.promptInput.value;
           var output = els.outputFull.value;
@@ -984,6 +1095,8 @@
           els.fsVal.textContent = fontSize + "px";
           els.pwVal.textContent = panelW + "px";
           els.bsVal.textContent = bottomSpace + "px";
+          els.crVal.textContent = cropPct + "%";
+          els.cropInfo.textContent = cropPct + "%";
 
           var lineH = Math.round(fontSize * 1.33);
           var bodyFont = fontSize + "px " + MONO;
@@ -1009,8 +1122,6 @@
 
           canvas.width = Math.round(panelW * S);
           canvas.height = Math.round(H * S);
-          canvas.style.width = panelW + "px";
-          canvas.style.height = "auto";
 
           ctx.setTransform(S, 0, 0, S, 0, 0);
           ctx.imageSmoothingEnabled = true;
@@ -1053,9 +1164,21 @@
             ctx.fillRect(textLeft + cursorCol * charW, cy + (lineH - ch) / 2, charW, ch);
           }
 
-          els.dimInfo.textContent = panelW + " × " + H + " px";
+          // Info
+          var visibleW = Math.round(panelW * (1 - cropPct / 100));
+          els.dimInfo.textContent = visibleW + " × " + H + " px";
           els.lineInfo.textContent = lines.length;
 
+          // Sizing — must run AFTER canvas.width is set
+          updateCanvasDisplay(panelW, cropPct);
+
+          // Reset button states
+          refreshResetButtons();
+
+          // Crop overlay (desktop only) — next frame so layout settles
+          requestAnimationFrame(function () { updateCropOverlay(cropPct); });
+
+          // Preset button highlight
           var presetBtns = els.presets.querySelectorAll(".preset");
           for (var k = 0; k < presetBtns.length; k++) {
             var pw = +presetBtns[k].dataset.w;
@@ -1067,17 +1190,27 @@
         }
       }
 
-      /* ---------- Download / Copy ------------------------------------ */
+      /* ---------- Export (respects crop) ----------------------------- */
+      function buildExportCanvas() {
+        var cropPct = +els.cropRight.value;
+        var visibleFrac = 1 - cropPct / 100;
+        var srcW = canvas.width;
+        var srcH = canvas.height;
+        var outW = Math.max(1, Math.round(srcW * visibleFrac));
+
+        var tmp = document.createElement("canvas");
+        tmp.width = outW;
+        tmp.height = srcH;
+        var tctx = tmp.getContext("2d");
+        tctx.fillStyle = "#181818";
+        tctx.fillRect(0, 0, outW, srcH);
+        tctx.drawImage(canvas, 0, 0, outW, srcH, 0, 0, outW, srcH);
+        return tmp;
+      }
+
       function download() {
         try {
-          var tmp = document.createElement("canvas");
-          tmp.width = canvas.width;
-          tmp.height = canvas.height;
-          var tctx = tmp.getContext("2d");
-          tctx.fillStyle = "#181818";
-          tctx.fillRect(0, 0, tmp.width, tmp.height);
-          tctx.drawImage(canvas, 0, 0);
-
+          var tmp = buildExportCanvas();
           var dataUrl = tmp.toDataURL("image/jpeg", JPG_QUALITY);
           var a = document.createElement("a");
           a.href = dataUrl;
@@ -1097,7 +1230,8 @@
           showToast("Clipboard not supported", "error");
           return;
         }
-        canvas.toBlob(function (blob) {
+        var tmp = buildExportCanvas();
+        tmp.toBlob(function (blob) {
           navigator.clipboard.write([new ClipboardItem({ "image/png": blob })])
             .then(function () { showToast("Copied", "success"); })
             .catch(function () { showToast("Copy failed", "error"); });
@@ -1110,6 +1244,7 @@
         els.fontSize.value = 14;
         els.panelWidth.value = 1500;
         els.bottomSpace.value = 0;
+        els.cropRight.value = 0;
         els.cursor.checked = true;
         render();
         showToast("Settings reset");
@@ -1129,7 +1264,7 @@
         els.outputFull.addEventListener("input", render);
         els.promptInput.addEventListener("input", render);
 
-        var inputs = [els.fontSize, els.panelWidth, els.bottomSpace, els.cursor];
+        var inputs = [els.fontSize, els.panelWidth, els.bottomSpace, els.cropRight, els.cursor];
         for (var i = 0; i < inputs.length; i++) {
           inputs[i].addEventListener("input", render);
           inputs[i].addEventListener("change", render);
@@ -1139,6 +1274,16 @@
           var target = ev.target.closest(".preset");
           if (!target) return;
           els.panelWidth.value = target.dataset.w;
+          render();
+        });
+
+        // Individual slider reset buttons
+        document.addEventListener("click", function (ev) {
+          var btn = ev.target.closest(".slider-reset");
+          if (!btn || btn.disabled) return;
+          var targetId = btn.dataset.target;
+          var def = btn.dataset.default;
+          els[targetId].value = def;
           render();
         });
 
