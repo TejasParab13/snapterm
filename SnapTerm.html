@@ -83,7 +83,7 @@
   <div class="wrap">
     <h1>SnapTerm → JPG</h1>
     <p class="sub">
-      Match your real VS Code panel — tune width, font and bottom space.
+      Shell-integration circle marks the gutter, active tab is a pill.
     </p>
 
     <div class="layout">
@@ -141,7 +141,7 @@
       <div class="preview-card">
         <canvas id="termCanvas"></canvas>
         <p class="hint">
-          Raise <b>Extra bottom space</b> until it matches real VS Code.
+          Circle before PS matches VS Code's shell integration gutter.
         </p>
       </div>
     </div>
@@ -160,12 +160,12 @@
         "Enter your choice: "
       ].join("\n");
 
-      var HEADER_H = 35, PAD_L = 12, PAD_R = 12, PAD_T = 4, PAD_B = 6;
+      var HEADER_H = 35, GUTTER = 18, PAD_L = 6, PAD_R = 12, PAD_T = 4, PAD_B = 8;
       var MONO = 'Consolas, "Cascadia Mono", "Courier New", monospace';
       var UI_FONT = '13px "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif';
       var C_PANEL = "#181818", C_BORDER = "#2b2b2b";
-      var C_TAB = "#9d9d9d", C_TAB_ON = "#e7e7e7", C_ACCENT = "#0078d4";
-      var C_TEXT = "#cccccc", C_ICON = "#c8c8c8";
+      var C_TAB = "#9d9d9d", C_TAB_ON = "#e7e7e7", C_TAB_BG = "#2b2b2b";
+      var C_TEXT = "#cccccc", C_ICON = "#c8c8c8", C_DOT = "#8a8a8a";
 
       function $(id) { return document.getElementById(id); }
 
@@ -194,6 +194,20 @@
           }
         }
         return out.length ? out : [""];
+      }
+
+      function roundRect(x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        ctx.lineTo(x + r, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
       }
 
       function drawPlus(cx, cy) {
@@ -235,8 +249,9 @@
           var active = tabs[i][1];
           var tw = ctx.measureText(label).width + 22;
           if (active) {
-            ctx.fillStyle = C_ACCENT;
-            ctx.fillRect(x, HEADER_H - 1, tw, 1);
+            ctx.fillStyle = C_TAB_BG;
+            roundRect(x + 3, 5, tw - 6, HEADER_H - 10, 5);
+            ctx.fill();
           }
           ctx.fillStyle = active ? C_TAB_ON : C_TAB;
           ctx.fillText(label, x + 11, HEADER_H / 2 + 1);
@@ -273,7 +288,8 @@
 
           meas.font = bodyFont;
           var charW = meas.measureText("M").width || (fontSize * 0.6);
-          var maxChars = Math.max(10, Math.floor((panelW - PAD_L - PAD_R) / charW));
+          var textLeft = PAD_L + GUTTER;
+          var maxChars = Math.max(10, Math.floor((panelW - textLeft - PAD_R) / charW));
 
           var raw = prompt.length ? (prompt + "\n" + output) : output;
           var lines = wrapChars(raw, maxChars);
@@ -300,14 +316,25 @@
 
           drawHeader(panelW);
 
+          var startY = HEADER_H + PAD_T;
+
+          // Circle before the PS prompt line
+          if (prompt.length > 0 && lines.length > 0) {
+            var dotCx = PAD_L + GUTTER / 2 + 1;
+            var dotCy = startY + lineH / 2;
+            ctx.beginPath();
+            ctx.arc(dotCx, dotCy, 4, 0, Math.PI * 2);
+            ctx.fillStyle = C_DOT;
+            ctx.fill();
+          }
+
           ctx.font = bodyFont;
           ctx.textBaseline = "middle";
           ctx.fillStyle = C_TEXT;
 
-          var startY = HEADER_H + PAD_T;
           for (var i = 0; i < lines.length; i++) {
             if (lines[i]) {
-              ctx.fillText(lines[i], PAD_L, startY + i * lineH + lineH / 2);
+              ctx.fillText(lines[i], textLeft, startY + i * lineH + lineH / 2);
             }
           }
 
@@ -315,7 +342,7 @@
             var cy = startY + cursorLine * lineH;
             var ch = Math.round(fontSize * 1.15);
             ctx.fillStyle = C_TEXT;
-            ctx.fillRect(PAD_L + cursorCol * charW, cy + (lineH - ch) / 2, charW, ch);
+            ctx.fillRect(textLeft + cursorCol * charW, cy + (lineH - ch) / 2, charW, ch);
           }
         } catch (err) { console.error("Render error:", err); }
       }
