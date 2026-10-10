@@ -39,7 +39,7 @@
     input[type=text], textarea {
       width: 100%; background: #0e0e10; border: 1px solid var(--border);
       border-radius: 6px; color: #e6e6e6; padding: 8px 10px;
-      font-family: Consolas, "Cascadia Mono", "Courier New", monospace;
+      font-family: "Cascadia Mono", "Cascadia Code", Consolas, "Courier New", monospace;
       font-size: 13px; resize: vertical; outline: none;
     }
     input[type=text]:focus, textarea:focus { border-color: var(--blue-bright); }
@@ -83,7 +83,7 @@
   <div class="wrap">
     <h1>SnapTerm → JPG</h1>
     <p class="sub">
-      Shell-integration circle marks the gutter, active tab is a pill.
+      Rendered with Cascadia Mono — the exact font VS Code uses on Windows.
     </p>
 
     <div class="layout">
@@ -100,9 +100,9 @@
 
         <div class="field">
           <label class="lbl" for="fontSize">
-            Font size <span class="val" id="fsVal">13px</span>
+            Font size <span class="val" id="fsVal">14px</span>
           </label>
-          <input type="range" id="fontSize" min="10" max="22" step="1" value="13" />
+          <input type="range" id="fontSize" min="10" max="22" step="1" value="14" />
         </div>
 
         <div class="field">
@@ -141,7 +141,7 @@
       <div class="preview-card">
         <canvas id="termCanvas"></canvas>
         <p class="hint">
-          Circle before PS matches VS Code's shell integration gutter.
+          Default font size 14px — matching VS Code's default terminal size.
         </p>
       </div>
     </div>
@@ -161,7 +161,7 @@
       ].join("\n");
 
       var HEADER_H = 35, GUTTER = 18, PAD_L = 6, PAD_R = 12, PAD_T = 4, PAD_B = 8;
-      var MONO = 'Consolas, "Cascadia Mono", "Courier New", monospace';
+      var MONO = '"Cascadia Mono", "Cascadia Code", Consolas, "Courier New", monospace';
       var UI_FONT = '13px "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif';
       var C_PANEL = "#181818", C_BORDER = "#2b2b2b";
       var C_TAB = "#9d9d9d", C_TAB_ON = "#e7e7e7", C_TAB_BG = "#2b2b2b";
@@ -311,6 +311,10 @@
           canvas.style.height = "auto";
 
           ctx.setTransform(S, 0, 0, S, 0, 0);
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = "high";
+          ctx.textRendering = "geometricPrecision";
+
           ctx.fillStyle = C_PANEL; ctx.fillRect(0, 0, panelW, H);
           ctx.fillStyle = C_BORDER; ctx.fillRect(0, 0, panelW, 1);
 
@@ -318,7 +322,6 @@
 
           var startY = HEADER_H + PAD_T;
 
-          // Circle before the PS prompt line
           if (prompt.length > 0 && lines.length > 0) {
             var dotCx = PAD_L + GUTTER / 2 + 1;
             var dotCy = startY + lineH / 2;
@@ -389,7 +392,7 @@
       function reset() {
         els.prompt.value = DEFAULT_PROMPT;
         els.output.value = DEFAULT_OUTPUT;
-        els.fontSize.value = 13;
+        els.fontSize.value = 14;
         els.panelWidth.value = 1500;
         els.bottomSpace.value = 120;
         els.quality.value = 95;
