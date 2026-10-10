@@ -83,8 +83,7 @@
   <div class="wrap">
     <h1>SnapTerm → JPG</h1>
     <p class="sub">
-      Paste your program output, get a pixel-accurate VS Code terminal panel
-      and download it as one JPG.
+      Match your real VS Code panel — tune width, font and bottom space.
     </p>
 
     <div class="layout">
@@ -110,7 +109,14 @@
           <label class="lbl" for="panelWidth">
             Panel width <span class="val" id="pwVal">1500px</span>
           </label>
-          <input type="range" id="panelWidth" min="700" max="2400" step="10" value="1500" />
+          <input type="range" id="panelWidth" min="700" max="2600" step="10" value="1500" />
+        </div>
+
+        <div class="field">
+          <label class="lbl" for="bottomSpace">
+            Extra bottom space <span class="val" id="bsVal">120px</span>
+          </label>
+          <input type="range" id="bottomSpace" min="0" max="800" step="10" value="120" />
         </div>
 
         <div class="field">
@@ -135,7 +141,7 @@
       <div class="preview-card">
         <canvas id="termCanvas"></canvas>
         <p class="hint">
-          Preview is the exported image. Rendered at <code>2×</code>.
+          Raise <b>Extra bottom space</b> until it matches real VS Code.
         </p>
       </div>
     </div>
@@ -154,7 +160,7 @@
         "Enter your choice: "
       ].join("\n");
 
-      var HEADER_H = 35, PAD_L = 10, PAD_R = 10, PAD_T = 6, PAD_B = 10;
+      var HEADER_H = 35, PAD_L = 12, PAD_R = 12, PAD_T = 4, PAD_B = 6;
       var MONO = 'Consolas, "Cascadia Mono", "Courier New", monospace';
       var UI_FONT = '13px "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif';
       var C_PANEL = "#181818", C_BORDER = "#2b2b2b";
@@ -166,8 +172,9 @@
       var els = {
         prompt: $("prompt"), output: $("output"),
         fontSize: $("fontSize"), panelWidth: $("panelWidth"),
-        quality: $("quality"), cursor: $("cursor"),
-        fsVal: $("fsVal"), pwVal: $("pwVal"), qVal: $("qVal"),
+        bottomSpace: $("bottomSpace"), quality: $("quality"),
+        cursor: $("cursor"), fsVal: $("fsVal"), pwVal: $("pwVal"),
+        bsVal: $("bsVal"), qVal: $("qVal"),
         dl: $("dl"), copy: $("copy"), reset: $("reset")
       };
 
@@ -226,13 +233,13 @@
         for (var i = 0; i < tabs.length; i++) {
           var label = tabs[i][0];
           var active = tabs[i][1];
-          var tw = ctx.measureText(label).width + 20;
+          var tw = ctx.measureText(label).width + 22;
           if (active) {
             ctx.fillStyle = C_ACCENT;
             ctx.fillRect(x, HEADER_H - 1, tw, 1);
           }
           ctx.fillStyle = active ? C_TAB_ON : C_TAB;
-          ctx.fillText(label, x + 10, HEADER_H / 2 + 1);
+          ctx.fillText(label, x + 11, HEADER_H / 2 + 1);
           x += tw;
         }
         var iy = Math.round(HEADER_H / 2);
@@ -251,15 +258,17 @@
         try {
           var fontSize = +els.fontSize.value;
           var panelW = +els.panelWidth.value;
+          var bottomSpace = +els.bottomSpace.value;
           var showCursor = els.cursor.checked;
           var prompt = els.prompt.value;
           var output = els.output.value;
 
           els.fsVal.textContent = fontSize + "px";
           els.pwVal.textContent = panelW + "px";
+          els.bsVal.textContent = bottomSpace + "px";
           els.qVal.textContent = els.quality.value + "%";
 
-          var lineH = Math.round(fontSize * 1.35);
+          var lineH = Math.round(fontSize * 1.33);
           var bodyFont = fontSize + "px " + MONO;
 
           meas.font = bodyFont;
@@ -274,7 +283,8 @@
           if (cursorCol >= maxChars) { cursorLine++; cursorCol = 0; }
 
           var bodyLines = Math.max(lines.length, showCursor ? cursorLine + 1 : 0);
-          var H = Math.max(HEADER_H + PAD_T + bodyLines * lineH + PAD_B, 140);
+          var H = HEADER_H + PAD_T + bodyLines * lineH + PAD_B + bottomSpace;
+          if (H < 160) H = 160;
 
           var S = 2;
           if (panelW * S * H * S > 2.0e8) S = 1;
@@ -307,29 +317,22 @@
             ctx.fillStyle = C_TEXT;
             ctx.fillRect(PAD_L + cursorCol * charW, cy + (lineH - ch) / 2, charW, ch);
           }
-        } catch (err) {
-          console.error("Render error:", err);
-        }
+        } catch (err) { console.error("Render error:", err); }
       }
 
       function download() {
         try {
           var q = Math.max(0.01, Math.min(1, (+els.quality.value) / 100));
           var tmp = document.createElement("canvas");
-          tmp.width = canvas.width;
-          tmp.height = canvas.height;
+          tmp.width = canvas.width; tmp.height = canvas.height;
           var tctx = tmp.getContext("2d");
           tctx.fillStyle = "#181818";
           tctx.fillRect(0, 0, tmp.width, tmp.height);
           tctx.drawImage(canvas, 0, 0);
-
           var dataUrl = tmp.toDataURL("image/jpeg", q);
           var a = document.createElement("a");
-          a.href = dataUrl;
-          a.download = "snapterm.jpg";
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
+          a.href = dataUrl; a.download = "snapterm.jpg";
+          document.body.appendChild(a); a.click(); document.body.removeChild(a);
         } catch (err) {
           console.error("Download error:", err);
           alert("Download failed: " + err.message);
@@ -361,14 +364,15 @@
         els.output.value = DEFAULT_OUTPUT;
         els.fontSize.value = 13;
         els.panelWidth.value = 1500;
+        els.bottomSpace.value = 120;
         els.quality.value = 95;
         els.cursor.checked = true;
         render();
       }
 
       function bind() {
-        var inputs = [els.prompt, els.output, els.fontSize,
-                      els.panelWidth, els.quality, els.cursor];
+        var inputs = [els.prompt, els.output, els.fontSize, els.panelWidth,
+                      els.bottomSpace, els.quality, els.cursor];
         for (var i = 0; i < inputs.length; i++) {
           inputs[i].addEventListener("input", render);
           inputs[i].addEventListener("change", render);
@@ -383,14 +387,11 @@
         els.output.value = DEFAULT_OUTPUT;
         bind();
         render();
-        console.log("SnapTerm ready.");
       }
 
       if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", init);
-      } else {
-        init();
-      }
+      } else { init(); }
     })();
   </script>
 </body>
