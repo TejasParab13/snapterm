@@ -177,7 +177,7 @@
       box-shadow: var(--shadow);
     }
 
-    /* Mobile + crop: clip the cropped side, scale visible region to fill */
+    /* Mobile + crop: zoom the visible region, but keep a peek of the cropped side */
     .canvas-wrap.cropping {
       width: 100%;
       max-width: 100%;
@@ -187,10 +187,12 @@
       max-width: none;
       border-radius: 8px 0 0 8px;
     }
-    /* Hide overlays when we're actually clipping them away */
-    .canvas-wrap.cropping .crop-overlay,
-    .canvas-wrap.cropping .crop-line {
-      display: none !important;
+    /* Keep the crop marker visible on mobile — softer so the peek stays readable */
+    .canvas-wrap.cropping .crop-overlay {
+      background: rgba(0, 0, 0, .45);
+      backdrop-filter: none;
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
     }
 
     .crop-overlay {
@@ -895,6 +897,7 @@
         settingsToggle: $("settingsToggle"),
 
         canvasWrap: $("canvasWrap"),
+        canvasScroll: document.querySelector(".canvas-scroll"),
         cropOverlay: $("cropOverlay"),
         cropLine: $("cropLine"),
 
@@ -1050,12 +1053,27 @@
       }
 
       /* ---------- Canvas display mode (mobile crop) ------------------ */
+      var CROP_PEEK_FRAC = 0.08;   // how much of the view the cropped peek takes
+      var CROP_PEEK_MIN  = 22;     // px — never smaller than this
+      var CROP_PEEK_MAX  = 0.22;   // never larger than this fraction of the view
+
       function updateCanvasDisplay(panelW, cropPct) {
         if (isMobile() && cropPct > 0) {
-          // Show only the visible (left) portion of the canvas — scaled up
-          var visibleFrac = 1 - cropPct / 100;
           els.canvasWrap.classList.add("cropping");
-          canvas.style.width = (100 / visibleFrac) + "%";
+
+          var avail = els.canvasWrap.clientWidth || els.canvasScroll.clientWidth;
+          var peek = Math.round(avail * CROP_PEEK_FRAC);
+          if (peek < CROP_PEEK_MIN) peek = CROP_PEEK_MIN;
+          if (peek > avail * CROP_PEEK_MAX) peek = Math.round(avail * CROP_PEEK_MAX);
+
+          var visibleFrac = 1 - cropPct / 100;
+
+          // Scale so the uncropped part fills (avail - peek) and `peek` px of the
+          // cropped side stays on screen. For small crops that math makes the canvas
+          // narrower than the view, so just fit the whole thing instead.
+          var w = Math.max((avail - peek) / visibleFrac, avail);
+
+          canvas.style.width = Math.round(w) + "px";
           canvas.style.maxWidth = "none";
         } else {
           els.canvasWrap.classList.remove("cropping");
@@ -1064,21 +1082,33 @@
         }
       }
 
-      /* ---------- Crop overlay (desktop only) ------------------------ */
+      /* ---------- Crop marker (desktop + mobile peek) ---------------- */
       function updateCropOverlay(cropPct) {
-        // On mobile, the cropped region is hidden entirely — no overlay needed
-        if (isMobile() || cropPct <= 0) {
+        if (cropPct <= 0) {
           els.cropOverlay.style.display = "none";
           els.cropLine.style.display = "none";
           return;
         }
+
+        var wrapRect = els.canvasWrap.getBoundingClientRect();
         var canvasRect = canvas.getBoundingClientRect();
-        var renderedW = canvasRect.width;
-        var cropPx = renderedW * (cropPct / 100);
+        if (!wrapRect.width || !canvasRect.width) {
+          els.cropOverlay.style.display = "none";
+          els.cropLine.style.display = "none";
+          return;
+        }
+
+        // Where the crop boundary lands, measured from the right edge of the view.
+        var visibleFrac = 1 - cropPct / 100;
+        var boundary = (canvasRect.left - wrapRect.left) + canvasRect.width * visibleFrac;
+        var fromRight = wrapRect.width - boundary;
+        if (fromRight < 0) fromRight = 0;
+        if (fromRight > wrapRect.width) fromRight = wrapRect.width;
+
         els.cropOverlay.style.display = "block";
-        els.cropOverlay.style.width = cropPx + "px";
+        els.cropOverlay.style.width = fromRight + "px";
         els.cropLine.style.display = "block";
-        els.cropLine.style.right = cropPx + "px";
+        els.cropLine.style.right = fromRight + "px";
       }
 
       /* ---------- Render --------------------------------------------- */
@@ -1175,7 +1205,7 @@
           // Reset button states
           refreshResetButtons();
 
-          // Crop overlay (desktop only) — next frame so layout settles
+          // Crop marker — next frame so layout settles
           requestAnimationFrame(function () { updateCropOverlay(cropPct); });
 
           // Preset button highlight
