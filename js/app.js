@@ -60,13 +60,14 @@
     colEditor:  $("colEditor"),
     colPreview: $("colPreview"),
 
-    /* Left column */
     outputFull:  $("outputFull"),
     promptInput: $("promptInput"),
 
-    /* Right column views */
     outputFullRight:  $("outputFullRight"),
     promptInputRight: $("promptInputRight"),
+
+    controlsCard:   $("controlsCard"),
+    controlsToggle: $("controlsToggle"),
 
     fontSize:    $("fontSize"),
     panelWidth:  $("panelWidth"),
@@ -143,6 +144,23 @@
     updateCanvasDisplay(+els.panelWidth.value, +els.cropRight.value);
     updateCropOverlay(+els.cropRight.value);
   });
+
+  /* ============================================================
+     COLLAPSIBLE RENDER CONTROLS  (mobile only)
+     ============================================================ */
+  function toggleControls() {
+    if (!isMobile()) return;
+    var collapsed = els.controlsCard.classList.toggle("collapsed");
+    els.controlsToggle.setAttribute("aria-expanded", collapsed ? "false" : "true");
+  }
+
+  function resetControlsCollapse() {
+    /* Ensure controls are always open when resizing to desktop */
+    if (!isMobile()) {
+      els.controlsCard.classList.remove("collapsed");
+      els.controlsToggle.setAttribute("aria-expanded", "true");
+    }
+  }
 
   /* ============================================================
      TOAST
@@ -513,14 +531,15 @@
      BIND
      ============================================================ */
   function bind() {
-    /* Nav — switch right-column view */
     els.tabs.addEventListener("click", function (ev) {
       var btn = ev.target.closest(".nav-item");
       if (!btn) return;
       if (btn.dataset.view) switchView(btn.dataset.view);
     });
 
-    /* Left column inputs — drive render + mirror to right */
+    /* Collapsible Render Controls (mobile) */
+    els.controlsToggle.addEventListener("click", toggleControls);
+
     els.outputFull.addEventListener("input", function () {
       if (els.outputFullRight) els.outputFullRight.value = els.outputFull.value;
       render();
@@ -530,7 +549,6 @@
       render();
     });
 
-    /* Right column inputs — mirror back to left + render */
     if (els.outputFullRight) {
       els.outputFullRight.addEventListener("input", function () {
         els.outputFull.value = els.outputFullRight.value;
@@ -574,6 +592,9 @@
         download();
       }
     });
+
+    /* Keep controls expanded if the user resizes to desktop */
+    window.addEventListener("resize", resetControlsCollapse);
   }
 
   /* ============================================================
@@ -586,6 +607,7 @@
 
     bind();
     applyLayout();
+    resetControlsCollapse();
     render();
   }
 

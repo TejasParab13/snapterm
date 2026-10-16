@@ -57,90 +57,101 @@
           <textarea id="outputFull" spellcheck="false" placeholder="Paste your program output…"></textarea>
         </section>
 
-        <section class="card card-controls">
-          <div class="label">Render Controls</div>
+        <section class="card card-controls" id="controlsCard">
+          <button class="card-toggle" id="controlsToggle" type="button" aria-expanded="true"
+            aria-controls="controlsBody">
+            <span class="label">Render Controls</span>
+            <svg class="chevron" viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M8 11 3 6l1-1 4 4 4-4 1 1-5 5Z" />
+            </svg>
+          </button>
 
-          <!-- Font size -->
-          <div class="ctl">
-            <div class="ctl-head">
-              <span class="ctl-name">Font size</span>
-              <div class="ctl-right">
-                <span class="val" id="fsVal">14px</span>
-                <button class="rst" type="button" title="Reset font size" data-target="fontSize" data-default="14">
-                  <svg viewBox="0 0 16 16" aria-hidden="true">
-                    <path
-                      d="M8 3a5 5 0 1 0 4.546 2.914.75.75 0 0 1 1.302-.746A6.5 6.5 0 1 1 8 1.5V.75a.25.25 0 0 1 .41-.19l2.5 2.5a.25.25 0 0 1 0 .38l-2.5 2.5A.25.25 0 0 1 8 5.75V3Z" />
-                  </svg>
-                </button>
+          <div class="card-controls-body" id="controlsBody">
+
+            <!-- Font size -->
+            <div class="ctl">
+              <div class="ctl-head">
+                <span class="ctl-name">Font size</span>
+                <div class="ctl-right">
+                  <span class="val" id="fsVal">14px</span>
+                  <button class="rst" type="button" title="Reset font size" data-target="fontSize" data-default="14">
+                    <svg viewBox="0 0 16 16" aria-hidden="true">
+                      <path
+                        d="M8 3a5 5 0 1 0 4.546 2.914.75.75 0 0 1 1.302-.746A6.5 6.5 0 1 1 8 1.5V.75a.25.25 0 0 1 .41-.19l2.5 2.5a.25.25 0 0 1 0 .38l-2.5 2.5A.25.25 0 0 1 8 5.75V3Z" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <input type="range" id="fontSize" min="10" max="22" step="1" value="14" />
+            </div>
+
+            <!-- Panel width -->
+            <div class="ctl">
+              <div class="ctl-head">
+                <span class="ctl-name">Panel width</span>
+                <div class="ctl-right">
+                  <span class="val" id="pwVal">1500px</span>
+                  <button class="rst" type="button" title="Reset panel width" data-target="panelWidth"
+                    data-default="1500">
+                    <svg viewBox="0 0 16 16" aria-hidden="true">
+                      <path
+                        d="M8 3a5 5 0 1 0 4.546 2.914.75.75 0 0 1 1.302-.746A6.5 6.5 0 1 1 8 1.5V.75a.25.25 0 0 1 .41-.19l2.5 2.5a.25.25 0 0 1 0 .38l-2.5 2.5A.25.25 0 0 1 8 5.75V3Z" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <input type="range" id="panelWidth" min="700" max="2600" step="10" value="1500" />
+              <div class="presets" id="presets">
+                <button class="preset" data-w="1000" type="button">1080p</button>
+                <button class="preset" data-w="1500" type="button">1500</button>
+                <button class="preset" data-w="1920" type="button">1920</button>
+                <button class="preset" data-w="2400" type="button">Wide</button>
               </div>
             </div>
-            <input type="range" id="fontSize" min="10" max="22" step="1" value="14" />
-          </div>
 
-          <!-- Panel width -->
-          <div class="ctl">
-            <div class="ctl-head">
-              <span class="ctl-name">Panel width</span>
-              <div class="ctl-right">
-                <span class="val" id="pwVal">1500px</span>
-                <button class="rst" type="button" title="Reset panel width" data-target="panelWidth"
-                  data-default="1500">
-                  <svg viewBox="0 0 16 16" aria-hidden="true">
-                    <path
-                      d="M8 3a5 5 0 1 0 4.546 2.914.75.75 0 0 1 1.302-.746A6.5 6.5 0 1 1 8 1.5V.75a.25.25 0 0 1 .41-.19l2.5 2.5a.25.25 0 0 1 0 .38l-2.5 2.5A.25.25 0 0 1 8 5.75V3Z" />
-                  </svg>
-                </button>
+            <!-- Bottom space -->
+            <div class="ctl">
+              <div class="ctl-head">
+                <span class="ctl-name">Bottom space</span>
+                <div class="ctl-right">
+                  <span class="val" id="bsVal">0px</span>
+                  <button class="rst" type="button" title="Reset bottom space" data-target="bottomSpace"
+                    data-default="0">
+                    <svg viewBox="0 0 16 16" aria-hidden="true">
+                      <path
+                        d="M8 3a5 5 0 1 0 4.546 2.914.75.75 0 0 1 1.302-.746A6.5 6.5 0 1 1 8 1.5V.75a.25.25 0 0 1 .41-.19l2.5 2.5a.25.25 0 0 1 0 .38l-2.5 2.5A.25.25 0 0 1 8 5.75V3Z" />
+                    </svg>
+                  </button>
+                </div>
               </div>
+              <input type="range" id="bottomSpace" min="0" max="800" step="10" value="0" />
             </div>
-            <input type="range" id="panelWidth" min="700" max="2600" step="10" value="1500" />
-            <div class="presets" id="presets">
-              <button class="preset" data-w="1000" type="button">1080p</button>
-              <button class="preset" data-w="1500" type="button">1500</button>
-              <button class="preset" data-w="1920" type="button">1920</button>
-              <button class="preset" data-w="2400" type="button">Wide</button>
-            </div>
-          </div>
 
-          <!-- Bottom space -->
-          <div class="ctl">
-            <div class="ctl-head">
-              <span class="ctl-name">Bottom space</span>
-              <div class="ctl-right">
-                <span class="val" id="bsVal">0px</span>
-                <button class="rst" type="button" title="Reset bottom space" data-target="bottomSpace" data-default="0">
-                  <svg viewBox="0 0 16 16" aria-hidden="true">
-                    <path
-                      d="M8 3a5 5 0 1 0 4.546 2.914.75.75 0 0 1 1.302-.746A6.5 6.5 0 1 1 8 1.5V.75a.25.25 0 0 1 .41-.19l2.5 2.5a.25.25 0 0 1 0 .38l-2.5 2.5A.25.25 0 0 1 8 5.75V3Z" />
-                  </svg>
-                </button>
+            <!-- Crop from right -->
+            <div class="ctl">
+              <div class="ctl-head">
+                <span class="ctl-name">Crop from right</span>
+                <div class="ctl-right">
+                  <span class="val" id="crVal">0%</span>
+                  <button class="rst" type="button" title="Reset crop" data-target="cropRight" data-default="0">
+                    <svg viewBox="0 0 16 16" aria-hidden="true">
+                      <path
+                        d="M8 3a5 5 0 1 0 4.546 2.914.75.75 0 0 1 1.302-.746A6.5 6.5 0 1 1 8 1.5V.75a.25.25 0 0 1 .41-.19l2.5 2.5a.25.25 0 0 1 0 .38l-2.5 2.5A.25.25 0 0 1 8 5.75V3Z" />
+                    </svg>
+                  </button>
+                </div>
               </div>
+              <input type="range" id="cropRight" min="0" max="95" step="5" value="0" />
             </div>
-            <input type="range" id="bottomSpace" min="0" max="800" step="10" value="0" />
-          </div>
 
-          <!-- Crop from right -->
-          <div class="ctl">
-            <div class="ctl-head">
-              <span class="ctl-name">Crop from right</span>
-              <div class="ctl-right">
-                <span class="val" id="crVal">0%</span>
-                <button class="rst" type="button" title="Reset crop" data-target="cropRight" data-default="0">
-                  <svg viewBox="0 0 16 16" aria-hidden="true">
-                    <path
-                      d="M8 3a5 5 0 1 0 4.546 2.914.75.75 0 0 1 1.302-.746A6.5 6.5 0 1 1 8 1.5V.75a.25.25 0 0 1 .41-.19l2.5 2.5a.25.25 0 0 1 0 .38l-2.5 2.5A.25.25 0 0 1 8 5.75V3Z" />
-                  </svg>
-                </button>
-              </div>
+            <!-- Cursor -->
+            <div class="ctl" style="margin-top:4px">
+              <label class="check">
+                <input type="checkbox" id="cursor" checked />
+                <span>Show cursor</span>
+              </label>
             </div>
-            <input type="range" id="cropRight" min="0" max="95" step="5" value="0" />
-          </div>
 
-          <!-- Cursor -->
-          <div class="ctl" style="margin-top:4px">
-            <label class="check">
-              <input type="checkbox" id="cursor" checked />
-              <span>Show cursor</span>
-            </label>
           </div>
         </section>
       </div>
