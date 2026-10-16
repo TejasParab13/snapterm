@@ -42,6 +42,7 @@ body {
 	font-family: var(--ui);
 	-webkit-font-smoothing: antialiased;
 	text-rendering: optimizeLegibility;
+	overscroll-behavior: none;
 }
 
 /* ============================================================
@@ -98,7 +99,7 @@ body {
 	flex-direction: column;
 	padding: 26px 34px 26px;
 	gap: 18px;
-	overflow-x: hidden;
+	overflow: hidden;
 }
 
 /* ---------- Topbar ---------- */
@@ -198,7 +199,7 @@ body {
 	display: grid;
 	grid-template-columns: minmax(320px, 390px) minmax(0, 1fr);
 	gap: 22px;
-	overflow-x: hidden;
+	overflow: hidden;
 }
 
 .col-editor,
@@ -240,7 +241,7 @@ body {
 }
 
 /* ============================================================
-   CARDS  (left column)
+   CARDS
    ============================================================ */
 .card {
 	display: flex;
@@ -989,12 +990,13 @@ input[type=checkbox]:checked::after {
    MOBILE ≤ 1023px
    ============================================================ */
 @media (max-width:1023px) {
+
+	/* No page scroll — layout fits exactly the viewport */
 	.app {
-		padding: 14px 12px 14px;
-		gap: 12px;
-		width: 100vw;
-		max-width: 100vw;
-		overflow-x: hidden;
+		padding: 12px 12px 12px;
+		gap: 10px;
+		height: 100dvh;
+		overflow: hidden;
 	}
 
 	.brand {
@@ -1017,11 +1019,10 @@ input[type=checkbox]:checked::after {
 	.stage {
 		display: flex;
 		flex-direction: column;
-		gap: 10px;
-		width: 100%;
-		max-width: 100%;
-		overflow-x: hidden;
-		overflow-y: auto;
+		gap: 8px;
+		flex: 1;
+		min-height: 0;
+		overflow: hidden;
 	}
 
 	.col-editor,
@@ -1034,125 +1035,84 @@ input[type=checkbox]:checked::after {
 		display: none;
 	}
 
-	/* Mobile stack order */
+	/* Hide the info strip entirely on mobile */
+	.info-row {
+		display: none;
+	}
+
+	/* Mobile stack order: Preview → Render Controls → Actions */
 	.view-stack {
 		order: 1;
 		flex: 1 1 auto;
-		min-height: 340px;
-		width: 100%;
-		min-width: 0;
+		min-height: 0;
+		overflow: hidden;
 	}
 
 	.card-controls {
 		order: 2;
-	}
-
-	.info-row {
-		order: 3;
+		flex: 0 0 auto;
 	}
 
 	.actions {
-		order: 4;
+		order: 3;
+		flex: 0 0 auto;
 	}
 
-	/* ---------- Preview: contrast plate + shadow, no frame ---------- */
+	/* Preview fills whatever space is left, scrolls internally */
+	.view {
+		min-height: 0;
+		overflow: hidden;
+	}
+
 	.preview-stage,
 	.term-stage {
-		border: none;
-		background: transparent;
-		border-radius: 0;
-		overflow: visible;
+		border-radius: 12px;
+		flex: 1;
+		min-height: 0;
 	}
 
-	.preview-stage::before,
-	.term-stage::before {
-		display: none;
-	}
-
-	/* Give the preview a dark plate behind the canvas so the drop
-     shadow has somewhere to land and the canvas pops from the page */
 	.preview-scroll,
 	.term-scroll {
-		padding: 10px;
-		background:
-			radial-gradient(ellipse at 50% 30%,
-				rgba(0, 0, 0, 0.55) 0%,
-				rgba(0, 0, 0, 0.25) 45%,
-				transparent 80%);
-		border-radius: 10px;
-	}
-
-	.canvas-wrap {
-		width: 100%;
-		min-width: 0;
+		padding: 12px;
+		overflow: auto;
 	}
 
 	#termCanvas {
 		border-radius: 6px;
 		box-shadow:
-			0 18px 42px rgba(0, 0, 0, 0.75),
-			0 0 0 1px rgba(255, 255, 255, 0.09);
+			0 14px 36px rgba(0, 0, 0, 0.6),
+			0 0 0 1px rgba(255, 255, 255, 0.06);
 	}
 
 	.term-panel {
 		border-radius: 6px;
 		box-shadow:
-			0 18px 42px rgba(0, 0, 0, 0.75),
-			0 0 0 1px rgba(255, 255, 255, 0.09);
+			0 14px 36px rgba(0, 0, 0, 0.6),
+			0 0 0 1px rgba(255, 255, 255, 0.06);
 	}
 
-	/* ==========================================================
-     INFO BAR — plain text row + thin vertical dividers,
-     fit to viewport width with no horizontal overflow
-     ========================================================== */
-	.info-row {
-		background: none;
-		border: none;
-		border-radius: 0;
-		backdrop-filter: none;
-		-webkit-backdrop-filter: none;
-		padding: 2px 0;
-		width: 100%;
+	/* Render Controls: cap height so expanding never pushes the layout */
+	.card-controls {
+		padding: 12px;
+	}
+
+	.card-controls-body {
+		max-height: 34vh;
+		overflow-y: auto;
+		overflow-x: hidden;
+	}
+
+	/* Prevent any horizontal overflow inside the controls body */
+	.card-controls-body,
+	.card-controls-body .ctl,
+	.card-controls-body .ctl-head,
+	.card-controls-body .presets {
+		min-width: 0;
 		max-width: 100%;
-		min-width: 0;
-		overflow: hidden;
-		justify-content: space-between;
-		flex-wrap: nowrap;
 	}
 
-	.info-pill {
-		flex: 1 1 0;
-		min-width: 0;
-		padding: 0 clamp(4px, 1.4vw, 12px);
-		gap: clamp(3px, 0.9vw, 8px);
-		border-right: none;
-		overflow: hidden;
-	}
-
-	.info-pill+.info-pill {
-		border-left: 1px solid rgba(255, 255, 255, 0.1);
-	}
-
-	.info-pill span {
-		font-family: var(--dot);
-		font-size: clamp(7.5px, 1.9vw, 10px);
-		letter-spacing: clamp(0.04em, 0.15vw, 0.1em);
-		color: rgba(255, 255, 255, 0.4);
-		line-height: 1;
-		overflow: hidden;
-		text-overflow: clip;
-		white-space: nowrap;
-		min-width: 0;
-	}
-
-	.info-pill b {
-		font-family: var(--mono);
-		font-size: clamp(8.5px, 2.1vw, 11px);
-		color: rgba(255, 255, 255, 0.9);
-		overflow: hidden;
-		text-overflow: clip;
-		white-space: nowrap;
-		min-width: 0;
+	.card-controls-body .presets {
+		flex-wrap: wrap;
 	}
 
 	/* ---------- Collapsible Render Controls ---------- */
@@ -1174,8 +1134,8 @@ input[type=checkbox]:checked::after {
 	}
 
 	.btn {
-		padding: 11px 15px 13px;
-		font-size: 13px;
+		padding: 10px 14px 11px;
+		font-size: 12.5px;
 		letter-spacing: 0.1em;
 	}
 
@@ -1208,7 +1168,8 @@ input[type=checkbox]:checked::after {
 
 @media (max-width:420px) {
 	.app {
-		padding: 12px 10px 12px;
+		padding: 10px 10px 10px;
+		gap: 8px;
 	}
 
 	.nav-links {
@@ -1226,6 +1187,14 @@ input[type=checkbox]:checked::after {
 
 	.preview-scroll,
 	.term-scroll {
-		padding: 8px;
+		padding: 10px;
+	}
+
+	.card-controls {
+		padding: 10px;
+	}
+
+	.card-controls-body {
+		max-height: 30vh;
 	}
 }
