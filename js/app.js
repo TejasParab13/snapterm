@@ -24,7 +24,7 @@
   ].join("\n");
 
   /* ============================================================
-     CANVAS GEOMETRY  (controls screenshot fidelity)
+     CANVAS GEOMETRY
      ============================================================ */
   var JPG_QUALITY = 0.95;
   var HEADER_H    = 35;
@@ -59,8 +59,13 @@
     colEditor:  $("colEditor"),
     colPreview: $("colPreview"),
 
+    /* Left column */
     outputFull:  $("outputFull"),
     promptInput: $("promptInput"),
+
+    /* Right column views */
+    outputFullRight:  $("outputFullRight"),
+    promptInputRight: $("promptInputRight"),
 
     fontSize:    $("fontSize"),
     panelWidth:  $("panelWidth"),
@@ -94,35 +99,35 @@
   var ctx    = canvas.getContext("2d");
   var meas   = document.createElement("canvas").getContext("2d");
 
-  var currentTab = isMobile() ? "preview" : "editor";
+  var views       = document.querySelectorAll(".view");
+  var currentView = "preview";
 
   /* ============================================================
-     LAYOUT
+     VIEW SWITCHING (right column)
      ============================================================ */
   function applyLayout() {
-    var mobile = isMobile();
-
-    var tabBtns = els.tabs.querySelectorAll(".tab");
-    for (var i = 0; i < tabBtns.length; i++) {
-      tabBtns[i].classList.toggle("active", tabBtns[i].dataset.tab === currentTab);
+    var navBtns = els.tabs.querySelectorAll(".nav-item");
+    for (var i = 0; i < navBtns.length; i++) {
+      navBtns[i].classList.toggle("active", navBtns[i].dataset.view === currentView);
+    }
+    for (var j = 0; j < views.length; j++) {
+      views[j].classList.toggle("active", views[j].dataset.view === currentView);
     }
 
-    if (mobile) {
-      els.colEditor.classList.toggle("active",  currentTab === "editor");
-      els.colPreview.classList.toggle("active", currentTab === "preview");
-    } else {
-      els.colEditor.classList.add("active");
-      els.colPreview.classList.add("active");
-    }
+    /* Recompute canvas sizing + crop marker once the preview view is visible */
+    updateCanvasDisplay(+els.panelWidth.value, +els.cropRight.value);
+    requestAnimationFrame(function () {
+      updateCropOverlay(+els.cropRight.value);
+    });
   }
 
-  function switchTab(name) {
-    currentTab = name;
+  function switchView(name) {
+    if (currentView === name) return;
+    currentView = name;
     applyLayout();
   }
 
   window.addEventListener("resize", function () {
-    applyLayout();
     updateCanvasDisplay(+els.panelWidth.value, +els.cropRight.value);
     updateCropOverlay(+els.cropRight.value);
   });
@@ -257,6 +262,9 @@
   var CROP_PEEK_MAX  = 0.22;
 
   function updateCanvasDisplay(panelW, cropPct) {
+    var previewView = document.querySelector('.view[data-view="preview"]');
+    if (previewView && !previewView.classList.contains("active")) return;
+
     if (isMobile() && cropPct > 0) {
       els.canvasWrap.classList.add("cropping");
 
@@ -281,6 +289,9 @@
      CROP MARKER
      ============================================================ */
   function updateCropOverlay(cropPct) {
+    var previewView = document.querySelector('.view[data-view="preview"]');
+    if (previewView && !previewView.classList.contains("active")) return;
+
     if (cropPct <= 0) {
       els.cropOverlay.style.display = "none";
       els.cropLine.style.display = "none";
@@ -473,31 +484,58 @@
     els.bottomSpace.value  = 0;
     els.cropRight.value    = 0;
     els.cursor.checked     = true;
+    syncLeftToRight();
     render();
     showToast("Settings reset");
+  }
+
+  /* ============================================================
+     INPUT MIRROR  (left ↔ right views)
+     ============================================================ */
+  function syncLeftToRight() {
+    if (els.outputFullRight)  els.outputFullRight.value  = els.outputFull.value;
+    if (els.promptInputRight) els.promptInputRight.value = els.promptInput.value;
+  }
+
+  function syncRightToLeft() {
+    els.outputFull.value  = els.outputFullRight.value;
+    els.promptInput.value = els.promptInputRight.value;
   }
 
   /* ============================================================
      BIND
      ============================================================ */
   function bind() {
-    /* Nav — tabs + actions */
+    /* Nav — switch right-column view */
     els.tabs.addEventListener("click", function (ev) {
       var btn = ev.target.closest(".nav-item");
       if (!btn) return;
-
-      if (btn.classList.contains("tab")) {
-        switchTab(btn.dataset.tab);
-        return;
-      }
-      var action = btn.dataset.action;
-      if (action === "export")     download();
-      else if (action === "copy")  copyImage();
-      else if (action === "reset") reset();
+      if (btn.dataset.view) switchView(btn.dataset.view);
     });
 
-    els.outputFull.addEventListener("input", render);
-    els.promptInput.addEventListener("input", render);
+    /* Left column inputs — drive render + mirror to right */
+    els.outputFull.addEventListener("input", function () {
+      if (els.outputFullRight) els.outputFullRight.value = els.outputFull.value;
+      render();
+    });
+    els.promptInput.addEventListener("input", function () {
+      if (els.promptInputRight) els.promptInputRight.value = els.promptInput.value;
+      render();
+    });
+
+    /* Right column inputs — mirror back to left + render */
+    if (els.outputFullRight) {
+      els.outputFullRight.addEventListener("input", function () {
+        els.outputFull.value = els.outputFullRight.value;
+        render();
+      });
+    }
+    if (els.promptInputRight) {
+      els.promptInputRight.addEventListener("input", function () {
+        els.promptInput.value = els.promptInputRight.value;
+        render();
+      });
+    }
 
     var inputs = [els.fontSize, els.panelWidth, els.bottomSpace, els.cropRight, els.cursor];
     for (var i = 0; i < inputs.length; i++) {
@@ -537,6 +575,8 @@
   function init() {
     els.promptInput.value = DEFAULT_PROMPT;
     els.outputFull.value  = DEFAULT_OUTPUT;
+    syncLeftToRight();
+
     bind();
     applyLayout();
     render();

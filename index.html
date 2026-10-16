@@ -29,11 +29,9 @@
       <div class="brand">SNAPTERM</div>
 
       <div class="nav-links" id="tabs">
-        <button class="nav-item tab" data-tab="preview" type="button">Preview</button>
-        <button class="nav-item tab" data-tab="editor" type="button">Editor</button>
-        <button class="nav-item act" data-action="export" type="button">Export</button>
-        <button class="nav-item act" data-action="copy" type="button">Copy</button>
-        <button class="nav-item act" data-action="reset" type="button">Reset</button>
+        <button class="nav-item active" data-view="preview" type="button">Preview</button>
+        <button class="nav-item" data-view="output" type="button">Output</button>
+        <button class="nav-item" data-view="prompt" type="button">Prompt</button>
       </div>
 
       <div class="dots"><span></span><span></span><span></span></div>
@@ -42,19 +40,19 @@
     <!-- ===================== STAGE ===================== -->
     <main class="stage">
 
-      <!-- ---------- EDITOR COLUMN ---------- -->
-      <div class="col-editor active" id="colEditor">
+      <!-- ---------- LEFT: editor column (unchanged) ---------- -->
+      <div class="col-editor" id="colEditor">
 
         <div class="hero">
           <h1>TERMINAL SNAPSHOTS<span>WHAT YOU PASTE</span></h1>
         </div>
 
-        <section class="card card-output">
+        <section class="card card-output left-editor-card">
           <div class="label">Terminal Output</div>
           <textarea id="outputFull" spellcheck="false" placeholder="Paste your program output…"></textarea>
         </section>
 
-        <section class="card card-prompt">
+        <section class="card card-prompt left-editor-card">
           <div class="label">Prompt / Command Line</div>
           <input type="text" id="promptInput" spellcheck="false" />
         </section>
@@ -147,50 +145,69 @@
         </section>
       </div>
 
-      <!-- ---------- PREVIEW COLUMN ---------- -->
-      <div class="col-preview active" id="colPreview">
+      <!-- ---------- RIGHT: switchable main window ---------- -->
+      <div class="col-preview" id="colPreview">
 
-        <div class="preview-stage">
-          <div class="preview-scroll">
-            <div class="canvas-wrap" id="canvasWrap">
-              <canvas id="termCanvas"></canvas>
-              <div class="crop-overlay" id="cropOverlay"></div>
-              <div class="crop-line" id="cropLine"></div>
+        <!-- Preview view -->
+        <div class="view active" data-view="preview">
+          <div class="preview-stage">
+            <div class="preview-scroll">
+              <div class="canvas-wrap" id="canvasWrap">
+                <canvas id="termCanvas"></canvas>
+                <div class="crop-overlay" id="cropOverlay"></div>
+                <div class="crop-line" id="cropLine"></div>
+              </div>
             </div>
+          </div>
+
+          <div class="info-row">
+            <div class="info-pill"><span>Size</span><b id="dimInfo">—</b></div>
+            <div class="info-pill"><span>Lines</span><b id="lineInfo">—</b></div>
+            <div class="info-pill"><span>Crop</span><b id="cropInfo">0%</b></div>
+            <div class="info-pill"><span>Format</span><b>JPEG · 95%</b></div>
+          </div>
+
+          <div class="actions">
+            <button class="btn btn-solid" id="dl" type="button">
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M8 12.5 3.5 8l1.06-1.06L7.25 9.63V1.5h1.5v8.13l2.69-2.69L12.5 8 8 12.5Zm-5 1.5h10v1H3v-1Z" />
+              </svg>
+              Download JPG
+            </button>
+            <button class="btn btn-ghost" id="copyBtn" type="button">
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path
+                  d="M10 1H3a1 1 0 0 0-1 1v8h1.5V2.5H10V1Zm2 2.5H6a1 1 0 0 0-1 1V14a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.5a1 1 0 0 0-1-1Zm0 10.5H6V4.5h6V14Z" />
+              </svg>
+              <span class="txt">Copy</span>
+            </button>
+            <button class="btn btn-ghost" id="resetBtn" type="button">
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path
+                  d="M8 3a5 5 0 1 0 4.546 2.914.75.75 0 0 1 1.302-.746A6.5 6.5 0 1 1 8 1.5V.75a.25.25 0 0 1 .41-.19l2.5 2.5a.25.25 0 0 1 0 .38l-2.5 2.5A.25.25 0 0 1 8 5.75V3Z" />
+              </svg>
+              <span class="txt">Reset</span>
+            </button>
           </div>
         </div>
 
-        <div class="info-row">
-          <div class="info-pill"><span>Size</span><b id="dimInfo">—</b></div>
-          <div class="info-pill"><span>Lines</span><b id="lineInfo">—</b></div>
-          <div class="info-pill"><span>Crop</span><b id="cropInfo">0%</b></div>
-          <div class="info-pill"><span>Format</span><b>JPEG · 95%</b></div>
+        <!-- Output view -->
+        <div class="view" data-view="output">
+          <section class="card card-output">
+            <div class="label">Terminal Output — Focus</div>
+            <textarea id="outputFullRight" spellcheck="false" placeholder="Paste your program output…"></textarea>
+          </section>
         </div>
 
-        <div class="actions">
-          <button class="btn btn-solid" id="dl" type="button">
-            <svg viewBox="0 0 16 16" aria-hidden="true">
-              <path d="M8 12.5 3.5 8l1.06-1.06L7.25 9.63V1.5h1.5v8.13l2.69-2.69L12.5 8 8 12.5Zm-5 1.5h10v1H3v-1Z" />
-            </svg>
-            Download JPG
-          </button>
-          <button class="btn btn-ghost" id="copyBtn" type="button">
-            <svg viewBox="0 0 16 16" aria-hidden="true">
-              <path
-                d="M10 1H3a1 1 0 0 0-1 1v8h1.5V2.5H10V1Zm2 2.5H6a1 1 0 0 0-1 1V14a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.5a1 1 0 0 0-1-1Zm0 10.5H6V4.5h6V14Z" />
-            </svg>
-            <span class="txt">Copy</span>
-          </button>
-          <button class="btn btn-ghost" id="resetBtn" type="button">
-            <svg viewBox="0 0 16 16" aria-hidden="true">
-              <path
-                d="M8 3a5 5 0 1 0 4.546 2.914.75.75 0 0 1 1.302-.746A6.5 6.5 0 1 1 8 1.5V.75a.25.25 0 0 1 .41-.19l2.5 2.5a.25.25 0 0 1 0 .38l-2.5 2.5A.25.25 0 0 1 8 5.75V3Z" />
-            </svg>
-            <span class="txt">Reset</span>
-          </button>
+        <!-- Prompt view -->
+        <div class="view" data-view="prompt">
+          <section class="card card-prompt">
+            <div class="label">Prompt / Command Line — Focus</div>
+            <input type="text" id="promptInputRight" spellcheck="false" />
+          </section>
         </div>
+
       </div>
-
     </main>
 
     <!-- ===================== STATUS BAR ===================== -->

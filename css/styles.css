@@ -40,7 +40,7 @@ body {
 }
 
 /* ============================================================
-   BACKDROP — gradient + radial glow + dot grid
+   BACKDROP
    ============================================================ */
 .stage-bg {
 	position: fixed;
@@ -226,6 +226,31 @@ body {
 }
 
 /* ============================================================
+   VIEWS (right column switcher)
+   ============================================================ */
+.view {
+	display: none;
+	flex-direction: column;
+	gap: 12px;
+	flex: 1;
+	min-height: 0;
+}
+
+.view.active {
+	display: flex;
+}
+
+.view>.card {
+	flex: 1 1 auto;
+	min-height: 0;
+}
+
+.view>.preview-stage {
+	flex: 1 1 auto;
+	min-height: 0;
+}
+
+/* ============================================================
    CARDS
    ============================================================ */
 .card {
@@ -247,7 +272,10 @@ body {
 	min-height: 150px;
 }
 
-.card-prompt,
+.card-prompt {
+	flex: 0 0 auto;
+}
+
 .card-controls {
 	flex: 0 0 auto;
 }
@@ -828,15 +856,6 @@ input[type=checkbox]:checked::after {
 }
 
 /* ============================================================
-   DESKTOP ≥ 1024px
-   ============================================================ */
-@media (min-width:1024px) {
-	.tab {
-		display: none;
-	}
-}
-
-/* ============================================================
    MOBILE ≤ 1023px
    ============================================================ */
 @media (max-width:1023px) {
@@ -858,48 +877,28 @@ input[type=checkbox]:checked::after {
 		font-size: 9.5px;
 	}
 
-	.act {
-		display: none;
-	}
-
 	.stage {
 		display: flex;
 		flex-direction: column;
 		gap: 14px;
+		overflow-y: auto;
 	}
 
-	.col-editor,
 	.col-preview {
-		display: none;
-		flex: 1;
-		min-height: 0;
-	}
-
-	.col-editor.active,
-	.col-preview.active {
-		display: flex;
+		flex: 1 1 auto;
+		min-height: 400px;
 	}
 
 	.col-editor {
-		overflow-y: auto;
-		padding-right: 2px;
-	}
-
-	.hero h1 {
-		font-size: 24px;
-	}
-
-	.hero h1 span {
-		font-size: 15px;
-	}
-
-	.card-output {
 		flex: 0 0 auto;
+		overflow: visible;
+		padding-right: 0;
 	}
 
-	.card-output textarea {
-		height: 190px;
-		flex: none;
+	/* Hide redundant left-side cards on mobile — the right views carry them */
+	.col-editor .hero,
+	.col-editor .left-editor-card {
+		display: none;
 	}
 
 	.preview-scroll {
