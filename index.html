@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Doto:wght@100..900&family=Orbitron:wght@400;500;700;900&family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap"
     rel="stylesheet">
 
   <link rel="stylesheet" href="css/styles.css">
@@ -34,27 +34,27 @@
         <button class="nav-item" data-view="prompt" type="button">Prompt</button>
       </div>
 
-      <div class="dots"><span></span><span></span><span></span></div>
+      <div class="dots" id="dots">
+        <span data-view="preview" class="active"></span>
+        <span data-view="output"></span>
+        <span data-view="prompt"></span>
+      </div>
     </nav>
 
     <!-- ===================== STAGE ===================== -->
     <main class="stage">
 
-      <!-- ---------- LEFT: editor column (unchanged) ---------- -->
+      <!-- ---------- LEFT: editor column ---------- -->
       <div class="col-editor" id="colEditor">
 
-        <div class="hero">
-          <h1>TERMINAL SNAPSHOTS<span>WHAT YOU PASTE</span></h1>
-        </div>
+        <section class="card card-prompt left-editor-card">
+          <div class="label">Prompt</div>
+          <textarea id="promptInput" class="prompt-single" spellcheck="false" rows="1"></textarea>
+        </section>
 
         <section class="card card-output left-editor-card">
           <div class="label">Terminal Output</div>
           <textarea id="outputFull" spellcheck="false" placeholder="Paste your program output…"></textarea>
-        </section>
-
-        <section class="card card-prompt left-editor-card">
-          <div class="label">Prompt / Command Line</div>
-          <input type="text" id="promptInput" spellcheck="false" />
         </section>
 
         <section class="card card-controls">
@@ -166,18 +166,24 @@
 
           <!-- Output view -->
           <div class="view" data-view="output">
-            <section class="card card-output">
-              <div class="label">Terminal Output — Focus</div>
-              <textarea id="outputFullRight" spellcheck="false" placeholder="Paste your program output…"></textarea>
-            </section>
+            <div class="term-stage">
+              <div class="term-scroll">
+                <div class="term-panel">
+                  <textarea id="outputFullRight" spellcheck="false" placeholder="Paste your program output…"></textarea>
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- Prompt view -->
           <div class="view" data-view="prompt">
-            <section class="card card-prompt">
-              <div class="label">Prompt / Command Line — Focus</div>
-              <input type="text" id="promptInputRight" spellcheck="false" />
-            </section>
+            <div class="term-stage">
+              <div class="term-scroll">
+                <div class="term-panel term-panel-prompt">
+                  <textarea id="promptInputRight" class="prompt-single" spellcheck="false" rows="1"></textarea>
+                </div>
+              </div>
+            </div>
           </div>
 
         </div>
@@ -216,17 +222,6 @@
 
       </div>
     </main>
-
-    <!-- ===================== STATUS BAR ===================== -->
-    <footer class="statusbar">
-      <div class="status-left">
-        <span class="pulse-dot"></span>
-        <span class="status-txt">Live Preview</span>
-        <span class="status-sep">·</span>
-        <span class="status-ver">v1.0.0</span>
-      </div>
-      <div class="status-right">© 2026 SnapTerm</div>
-    </footer>
 
   </div>
 

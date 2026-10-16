@@ -17,8 +17,16 @@
 	--line-2: rgba(255, 255, 255, 0.12);
 	--glass: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
 	--card-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+	--term-bg: #181818;
+	--term-text: #cccccc;
+
+	/* Font stacks */
+	--dot: 'Doto', 'Orbitron', system-ui, sans-serif;
+	/* dot-matrix display */
+	--tech: 'Orbitron', 'Doto', sans-serif;
+	/* legacy fallback */
 	--mono: 'Space Mono', ui-monospace, monospace;
-	--tech: 'Orbitron', sans-serif;
+	--term-font: "Cascadia Mono", "Cascadia Code", Consolas, "Courier New", monospace;
 	--ui: 'Inter', system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
 }
 
@@ -90,7 +98,7 @@ body {
 	width: 100%;
 	display: flex;
 	flex-direction: column;
-	padding: 26px 34px 20px;
+	padding: 26px 34px 26px;
 	gap: 18px;
 }
 
@@ -103,14 +111,17 @@ body {
 	gap: 24px;
 }
 
+/* Brand — dot-matrix, BIG and BOLD */
 .brand {
-	font-family: var(--tech);
+	font-family: var(--dot);
 	font-weight: 900;
-	font-size: 19px;
-	letter-spacing: 0.14em;
-	color: #fff;
+	font-size: 38px;
+	letter-spacing: 0.02em;
 	line-height: 1;
+	color: #fff;
 	flex-shrink: 0;
+	text-shadow: 0 0 28px rgba(255, 255, 255, 0.22);
+	-webkit-text-stroke: 0.6px #fff;
 }
 
 .nav-links {
@@ -123,9 +134,11 @@ body {
 	position: relative;
 	background: none;
 	border: none;
-	padding: 0 0 7px;
-	font: 600 10px/1 var(--ui);
-	letter-spacing: 0.16em;
+	padding: 0 0 8px;
+	font-family: var(--dot);
+	font-weight: 800;
+	font-size: 13px;
+	letter-spacing: 0.14em;
 	text-transform: uppercase;
 	color: var(--ink-4);
 	cursor: pointer;
@@ -155,12 +168,14 @@ body {
 
 .nav-item.active {
 	color: #fff;
+	text-shadow: 0 0 14px rgba(255, 255, 255, 0.15);
 }
 
 .nav-item.active::after {
 	opacity: 1;
 }
 
+/* ---------- Indicator dots ---------- */
 .dots {
 	display: flex;
 	gap: 6px;
@@ -172,10 +187,11 @@ body {
 	height: 5px;
 	border-radius: 50%;
 	background: rgba(255, 255, 255, 0.2);
+	transition: background .2s;
 }
 
-.dots span:first-child {
-	background: rgba(255, 255, 255, 0.8);
+.dots span.active {
+	background: rgba(255, 255, 255, 0.85);
 }
 
 /* ---------- Stage ---------- */
@@ -200,31 +216,6 @@ body {
 	padding-right: 3px;
 }
 
-/* ---------- Hero ---------- */
-.hero {
-	flex-shrink: 0;
-	padding: 2px 0 4px;
-}
-
-.hero h1 {
-	margin: 0;
-	font-family: var(--tech);
-	font-weight: 900;
-	font-size: 21px;
-	line-height: 1.08;
-	letter-spacing: -0.005em;
-	color: #fff;
-}
-
-.hero h1 span {
-	display: block;
-	font-weight: 500;
-	font-size: 14px;
-	letter-spacing: 0.01em;
-	color: rgba(255, 255, 255, 0.16);
-	margin-top: 2px;
-}
-
 /* ============================================================
    VIEW STACK — right column switcher
    ============================================================ */
@@ -247,18 +238,8 @@ body {
 	display: flex;
 }
 
-.view>.card {
-	flex: 1 1 auto;
-	min-height: 0;
-}
-
-.view>.preview-stage {
-	flex: 1 1 auto;
-	min-height: 0;
-}
-
 /* ============================================================
-   CARDS
+   CARDS  (left column only)
    ============================================================ */
 .card {
 	display: flex;
@@ -287,18 +268,21 @@ body {
 	flex: 0 0 auto;
 }
 
+/* Section labels — dot-matrix display */
 .label {
 	flex-shrink: 0;
-	font-size: 9px;
-	font-weight: 700;
-	letter-spacing: 0.16em;
+	font-family: var(--dot);
+	font-weight: 800;
+	font-size: 14px;
+	letter-spacing: 0.14em;
 	text-transform: uppercase;
-	color: var(--ink-4);
+	color: var(--ink-2);
+	line-height: 1;
 }
 
-/* ---------- Inputs ---------- */
-textarea,
-input[type=text] {
+/* ---------- Left column inputs ---------- */
+.card textarea,
+.card input[type=text] {
 	width: 100%;
 	background: rgba(0, 0, 0, 0.35);
 	border: 1px solid var(--line);
@@ -312,26 +296,45 @@ input[type=text] {
 	transition: border-color .2s, box-shadow .2s, background .2s;
 }
 
-textarea {
+.card textarea {
 	resize: none;
 	flex: 1;
 	min-height: 0;
 }
 
-input[type=text] {
+.card input[type=text] {
 	min-height: 46px;
 }
 
-textarea::placeholder,
-input[type=text]::placeholder {
+.card textarea::placeholder,
+.card input[type=text]::placeholder {
 	color: rgba(255, 255, 255, 0.2);
 }
 
-textarea:focus,
-input[type=text]:focus {
+.card textarea:focus,
+.card input[type=text]:focus {
 	border-color: rgba(255, 255, 255, 0.22);
 	background: rgba(0, 0, 0, 0.5);
 	box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.045);
+}
+
+/* ============================================================
+   SINGLE-LINE PROMPT TEXTAREAS
+   ============================================================ */
+.prompt-single {
+	white-space: nowrap;
+	overflow-x: auto;
+	overflow-y: hidden;
+	resize: none;
+}
+
+.card textarea.prompt-single {
+	flex: 0 0 auto;
+	height: 46px;
+	min-height: 46px;
+	max-height: 46px;
+	padding: 12px 14px;
+	line-height: 20px;
 }
 
 /* ============================================================
@@ -354,12 +357,15 @@ input[type=text]:focus {
 	gap: 8px;
 }
 
+/* Control names — dot-matrix display */
 .ctl-name {
-	font-size: 10px;
-	font-weight: 700;
-	letter-spacing: 0.1em;
+	font-family: var(--dot);
+	font-weight: 800;
+	font-size: 13px;
+	letter-spacing: 0.08em;
 	text-transform: uppercase;
-	color: rgba(255, 255, 255, 0.5);
+	color: rgba(255, 255, 255, 0.62);
+	line-height: 1;
 }
 
 .ctl-right {
@@ -369,6 +375,7 @@ input[type=text]:focus {
 	flex-shrink: 0;
 }
 
+/* Value badges — keep mono for numeric legibility */
 .val {
 	font-family: var(--mono);
 	font-size: 10px;
@@ -468,7 +475,7 @@ input[type=range]::-moz-range-track {
 	border-radius: 2px;
 }
 
-/* ---------- Presets ---------- */
+/* ---------- Presets — dot-matrix chips ---------- */
 .presets {
 	display: flex;
 	gap: 6px;
@@ -477,15 +484,18 @@ input[type=range]::-moz-range-track {
 }
 
 .preset {
-	font: 700 9px/1 var(--ui);
-	letter-spacing: 0.12em;
+	font-family: var(--dot);
+	font-weight: 800;
+	font-size: 12px;
+	letter-spacing: 0.1em;
 	text-transform: uppercase;
-	padding: 6px 11px;
+	padding: 5px 12px 6px;
 	border-radius: 9999px;
 	border: 1px solid var(--line-2);
 	background: rgba(255, 255, 255, 0.03);
 	color: var(--ink-3);
 	cursor: pointer;
+	line-height: 1;
 	transition: all .15s;
 }
 
@@ -505,9 +515,11 @@ input[type=range]::-moz-range-track {
 	display: flex;
 	align-items: center;
 	gap: 11px;
-	font-size: 12px;
-	font-weight: 500;
-	color: rgba(255, 255, 255, 0.55);
+	font-family: var(--dot);
+	font-weight: 700;
+	font-size: 13px;
+	letter-spacing: 0.06em;
+	color: rgba(255, 255, 255, 0.62);
 	cursor: pointer;
 	user-select: none;
 }
@@ -544,7 +556,7 @@ input[type=checkbox]:checked::after {
 }
 
 /* ============================================================
-   PREVIEW
+   PREVIEW STAGE
    ============================================================ */
 .preview-stage {
 	position: relative;
@@ -595,7 +607,6 @@ input[type=checkbox]:checked::after {
 	box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.06);
 }
 
-/* Mobile crop peek */
 .canvas-wrap.cropping {
 	width: 100%;
 	max-width: 100%;
@@ -637,41 +648,177 @@ input[type=checkbox]:checked::after {
 	display: none;
 }
 
-/* ---------- Info pills (pinned) ---------- */
+/* ============================================================
+   TERM STAGE — Output / Prompt views
+   ============================================================ */
+.term-stage {
+	position: relative;
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	border-radius: 12px;
+	border: 1px solid rgba(255, 255, 255, 0.07);
+	background: rgba(0, 0, 0, 0.28);
+	overflow: hidden;
+}
+
+.term-stage::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+	background-size: 24px 24px;
+	-webkit-mask-image: radial-gradient(ellipse at 50% 40%, #000 25%, transparent 78%);
+	mask-image: radial-gradient(ellipse at 50% 40%, #000 25%, transparent 78%);
+}
+
+.term-scroll {
+	position: relative;
+	z-index: 1;
+	flex: 1;
+	min-height: 0;
+	overflow: auto;
+	padding: 26px;
+	display: flex;
+	align-items: stretch;
+	justify-content: center;
+}
+
+.term-panel {
+	position: relative;
+	width: 100%;
+	min-height: 100%;
+	display: flex;
+	background: var(--term-bg);
+	border-radius: 8px;
+	border: 1px solid rgba(255, 255, 255, 0.06);
+	box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.06);
+	overflow: hidden;
+}
+
+.view[data-view="prompt"] .term-scroll {
+	align-items: flex-start;
+}
+
+.term-panel-prompt {
+	align-items: stretch;
+	min-height: 0;
+	height: auto;
+	padding: 0;
+}
+
+.term-panel textarea,
+.term-panel input[type=text] {
+	width: 100%;
+	background: transparent;
+	border: none;
+	border-radius: 8px;
+	color: var(--term-text);
+	font-family: var(--term-font);
+	font-size: 14px;
+	line-height: 1.4;
+	padding: 14px 16px;
+	outline: none;
+	resize: none;
+	caret-color: var(--term-text);
+}
+
+.term-panel textarea {
+	flex: 1;
+	min-height: 0;
+}
+
+.term-panel input[type=text] {
+	padding: 8px 16px;
+}
+
+.term-panel textarea.prompt-single {
+	flex: 0 0 auto;
+	height: 48px;
+	min-height: 48px;
+	max-height: 48px;
+	padding: 12px 16px;
+	line-height: 22px;
+	white-space: nowrap;
+	overflow-x: auto;
+	overflow-y: hidden;
+}
+
+.term-panel textarea::placeholder,
+.term-panel input[type=text]::placeholder {
+	color: rgba(204, 204, 204, 0.32);
+}
+
+.term-panel textarea::selection,
+.term-panel input[type=text]::selection {
+	background: rgba(255, 255, 255, 0.18);
+}
+
+.term-panel textarea::-webkit-scrollbar,
+.term-panel input[type=text]::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+
+.term-panel textarea::-webkit-scrollbar-thumb,
+.term-panel input[type=text]::-webkit-scrollbar-thumb {
+	background: rgba(255, 255, 255, 0.12);
+	border-radius: 6px;
+}
+
+/* ============================================================
+   INFO BAR — refined metric strip (pinned)
+   ============================================================ */
 .info-row {
 	flex-shrink: 0;
 	display: flex;
-	gap: 8px;
+	align-items: center;
 	flex-wrap: wrap;
+	gap: 0;
+	padding: 0;
+	background: rgba(255, 255, 255, 0.02);
+	border: 1px solid rgba(255, 255, 255, 0.055);
+	border-radius: 10px;
+	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(10px);
+	overflow: hidden;
 }
 
 .info-pill {
 	display: flex;
-	align-items: center;
-	gap: 8px;
-	padding: 7px 14px;
-	border: 1px solid rgba(255, 255, 255, 0.1);
-	background: rgba(255, 255, 255, 0.035);
-	border-radius: 9999px;
-	backdrop-filter: blur(4px);
+	align-items: baseline;
+	gap: 9px;
+	padding: 9px 16px;
+	border-right: 1px solid rgba(255, 255, 255, 0.055);
+	white-space: nowrap;
 }
 
+.info-pill:last-child {
+	border-right: none;
+}
+
+/* Info labels — dot-matrix */
 .info-pill span {
-	font-size: 9px;
-	font-weight: 700;
+	font-family: var(--dot);
+	font-size: 11px;
+	font-weight: 800;
 	letter-spacing: 0.14em;
 	text-transform: uppercase;
-	color: var(--ink-4);
+	color: rgba(255, 255, 255, 0.38);
+	line-height: 1;
 }
 
 .info-pill b {
 	font-family: var(--mono);
-	font-size: 10.5px;
-	font-weight: 700;
-	color: rgba(255, 255, 255, 0.85);
+	font-size: 11px;
+	font-weight: 400;
+	letter-spacing: 0.02em;
+	color: rgba(255, 255, 255, 0.88);
+	font-feature-settings: "tnum" 1;
 }
 
-/* ---------- Buttons (pinned) ---------- */
+/* ---------- Buttons (pinned) — dot-matrix labels ---------- */
 .actions {
 	flex-shrink: 0;
 	display: flex;
@@ -683,10 +830,13 @@ input[type=checkbox]:checked::after {
 	align-items: center;
 	justify-content: center;
 	gap: 8px;
-	font: 700 11px/1 var(--ui);
+	font-family: var(--dot);
+	font-weight: 800;
+	font-size: 14px;
 	letter-spacing: 0.14em;
 	text-transform: uppercase;
-	padding: 14px 18px;
+	line-height: 1;
+	padding: 12px 18px 14px;
 	border-radius: 10px;
 	border: 1px solid transparent;
 	cursor: pointer;
@@ -740,72 +890,6 @@ input[type=checkbox]:checked::after {
 	transform: translateY(1px);
 }
 
-/* ---------- Status bar ---------- */
-.statusbar {
-	flex-shrink: 0;
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 16px;
-	padding-top: 2px;
-}
-
-.status-left {
-	display: flex;
-	align-items: center;
-	gap: 10px;
-}
-
-.pulse-dot {
-	width: 7px;
-	height: 7px;
-	border-radius: 50%;
-	background: #34d399;
-	animation: pulse-dark 2.5s ease-in-out infinite;
-}
-
-@keyframes pulse-dark {
-
-	0%,
-	100% {
-		opacity: 1;
-		box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.45);
-	}
-
-	50% {
-		opacity: .75;
-		box-shadow: 0 0 0 6px rgba(52, 211, 153, 0);
-	}
-}
-
-.status-txt {
-	font-size: 9.5px;
-	font-weight: 700;
-	letter-spacing: 0.16em;
-	text-transform: uppercase;
-	color: rgba(255, 255, 255, 0.4);
-}
-
-.status-sep {
-	color: rgba(255, 255, 255, 0.15);
-	font-size: 10px;
-}
-
-.status-ver {
-	font-family: var(--mono);
-	font-size: 9.5px;
-	font-weight: 700;
-	color: rgba(255, 255, 255, 0.28);
-}
-
-.status-right {
-	font-size: 9.5px;
-	font-weight: 700;
-	letter-spacing: 0.14em;
-	text-transform: uppercase;
-	color: rgba(255, 255, 255, 0.22);
-}
-
 /* ---------- Toast ---------- */
 .toast {
 	position: fixed;
@@ -819,10 +903,12 @@ input[type=checkbox]:checked::after {
 	backdrop-filter: blur(16px);
 	-webkit-backdrop-filter: blur(16px);
 	color: #fff;
-	font-size: 10.5px;
-	font-weight: 700;
-	letter-spacing: 0.1em;
+	font-family: var(--dot);
+	font-weight: 800;
+	font-size: 13px;
+	letter-spacing: 0.12em;
 	text-transform: uppercase;
+	line-height: 1;
 	opacity: 0;
 	pointer-events: none;
 	transition: opacity .22s, transform .22s;
@@ -867,12 +953,12 @@ input[type=checkbox]:checked::after {
    ============================================================ */
 @media (max-width:1023px) {
 	.app {
-		padding: 18px 18px 14px;
+		padding: 18px 18px 18px;
 		gap: 14px;
 	}
 
 	.brand {
-		font-size: 16px;
+		font-size: 30px;
 	}
 
 	.nav-links {
@@ -880,8 +966,8 @@ input[type=checkbox]:checked::after {
 	}
 
 	.nav-item {
+		font-size: 12px;
 		letter-spacing: 0.12em;
-		font-size: 9.5px;
 	}
 
 	.stage {
@@ -902,19 +988,18 @@ input[type=checkbox]:checked::after {
 		padding-right: 0;
 	}
 
-	/* Hide redundant left-side cards on mobile — right views carry them */
-	.col-editor .hero,
 	.col-editor .left-editor-card {
 		display: none;
 	}
 
-	.preview-scroll {
+	.preview-scroll,
+	.term-scroll {
 		padding: 16px;
 	}
 
 	.btn {
-		padding: 13px 15px;
-		font-size: 10.5px;
+		padding: 11px 15px 13px;
+		font-size: 13px;
 		letter-spacing: 0.1em;
 	}
 
@@ -923,13 +1008,45 @@ input[type=checkbox]:checked::after {
 	}
 
 	.info-pill {
-		padding: 6px 11px;
+		padding: 8px 12px;
+		gap: 7px;
+	}
+
+	.info-pill span {
+		font-size: 10px;
+		letter-spacing: 0.12em;
+	}
+
+	.info-pill b {
+		font-size: 10px;
+	}
+
+	.label {
+		font-size: 13px;
+	}
+
+	.ctl-name {
+		font-size: 12px;
+	}
+
+	.check {
+		font-size: 12px;
+	}
+
+	.preset {
+		font-size: 11px;
+		padding: 4px 10px 5px;
+	}
+
+	.term-panel textarea,
+	.term-panel input[type=text] {
+		font-size: 13px;
 	}
 }
 
 @media (max-width:420px) {
 	.app {
-		padding: 14px 14px 12px;
+		padding: 14px 14px 14px;
 	}
 
 	.nav-links {
@@ -937,11 +1054,20 @@ input[type=checkbox]:checked::after {
 	}
 
 	.brand {
-		font-size: 14px;
-		letter-spacing: 0.1em;
+		font-size: 24px;
+		letter-spacing: 0.02em;
 	}
 
-	.dots {
-		display: none;
+	.nav-item {
+		font-size: 11px;
+	}
+
+	.info-row {
+		flex-wrap: wrap;
+	}
+
+	.info-pill {
+		flex: 1 1 auto;
+		justify-content: center;
 	}
 }

@@ -56,6 +56,7 @@
 
   var els = {
     tabs:       $("tabs"),
+    dots:       $("dots"),
     colEditor:  $("colEditor"),
     colPreview: $("colPreview"),
 
@@ -106,10 +107,21 @@
      VIEW SWITCHING (right column)
      ============================================================ */
   function applyLayout() {
+    /* Nav underline */
     var navBtns = els.tabs.querySelectorAll(".nav-item");
     for (var i = 0; i < navBtns.length; i++) {
       navBtns[i].classList.toggle("active", navBtns[i].dataset.view === currentView);
     }
+
+    /* Indicator dots sync with active tab */
+    if (els.dots) {
+      var dots = els.dots.querySelectorAll("span");
+      for (var d = 0; d < dots.length; d++) {
+        dots[d].classList.toggle("active", dots[d].dataset.view === currentView);
+      }
+    }
+
+    /* Right-column views */
     for (var j = 0; j < views.length; j++) {
       views[j].classList.toggle("active", views[j].dataset.view === currentView);
     }
@@ -495,11 +507,6 @@
   function syncLeftToRight() {
     if (els.outputFullRight)  els.outputFullRight.value  = els.outputFull.value;
     if (els.promptInputRight) els.promptInputRight.value = els.promptInput.value;
-  }
-
-  function syncRightToLeft() {
-    els.outputFull.value  = els.outputFullRight.value;
-    els.promptInput.value = els.promptInputRight.value;
   }
 
   /* ============================================================
