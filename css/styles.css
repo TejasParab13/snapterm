@@ -226,8 +226,15 @@ body {
 }
 
 /* ============================================================
-   VIEWS (right column switcher)
+   VIEW STACK — right column switcher
    ============================================================ */
+.view-stack {
+	display: flex;
+	flex-direction: column;
+	flex: 1 1 auto;
+	min-height: 0;
+}
+
 .view {
 	display: none;
 	flex-direction: column;
@@ -630,7 +637,7 @@ input[type=checkbox]:checked::after {
 	display: none;
 }
 
-/* ---------- Info pills ---------- */
+/* ---------- Info pills (pinned) ---------- */
 .info-row {
 	flex-shrink: 0;
 	display: flex;
@@ -664,7 +671,7 @@ input[type=checkbox]:checked::after {
 	color: rgba(255, 255, 255, 0.85);
 }
 
-/* ---------- Buttons ---------- */
+/* ---------- Buttons (pinned) ---------- */
 .actions {
 	flex-shrink: 0;
 	display: flex;
@@ -895,7 +902,7 @@ input[type=checkbox]:checked::after {
 		padding-right: 0;
 	}
 
-	/* Hide redundant left-side cards on mobile — the right views carry them */
+	/* Hide redundant left-side cards on mobile — right views carry them */
 	.col-editor .hero,
 	.col-editor .left-editor-card {
 		display: none;
